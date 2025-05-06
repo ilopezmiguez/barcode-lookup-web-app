@@ -4,8 +4,12 @@ import { createClient } from '@supabase/supabase-js';
 // Replace these values with your actual Supabase project details
 // These will be publicly visible, but that's OK since we'll use Row Level Security (RLS)
 // in the Supabase dashboard to control access
-const supabaseUrl = 'https://your-project-url.supabase.co';
-const supabaseAnonKey = 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
