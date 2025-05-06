@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: mode === 'production' ? './' : '/', // Use relative paths in production
+  base: mode === 'production' ? '/barcode-lookup-web-app/' : '/', // Use the repository name as base path
   plugins: [
     react(),
     mode === 'development' &&

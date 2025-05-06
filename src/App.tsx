@@ -11,9 +11,12 @@ import NotFound from "./pages/NotFound";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
+// Check if we're in production to use the correct basename for GitHub Pages
+const basename = import.meta.env.PROD ? '/barcode-lookup-web-app' : '/';
+
 const App = () => (
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
