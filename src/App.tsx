@@ -12,7 +12,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // Check if we're in production to use the correct basename for GitHub Pages
-const basename = import.meta.env.PROD ? '/barcode-lookup-web-app' : '/';
+const basename = import.meta.env.PROD ? '/barcode-lookup-web-app/' : '/';
 
 const App = () => (
   <StrictMode>

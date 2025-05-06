@@ -8,21 +8,17 @@
     // Single Page Apps for GitHub Pages
     // MIT License
     // https://github.com/rafgraph/spa-github-pages
-    var segmentCount = 1;
-    var repoName = "barcode-lookup-web-app";
-    
     var l = window.location;
-    var location = l.href;
     
-    // Extract the path from the URL excluding the repository name
-    var path = location.split('/').slice(4).join('/');
+    // Extract the path and query from the URL
+    var path = l.pathname.split('/barcode-lookup-web-app/')[1] || '';
     
     // Redirect to the root with the path as a parameter
     l.replace(
       l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      '/' + repoName + '/?path=' + 
-      path + 
-      (l.search ? '&' + l.search.slice(1) : '') +
+      '/barcode-lookup-web-app/' + 
+      (path ? '?' + path.split('&').map(function(s) { return s.replace(/&/g, '~and~'); }).join('&') : '') +
+      (l.search ? (path ? '&' : '?') + l.search.slice(1) : '') +
       l.hash
     );
   </script>
