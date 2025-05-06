@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { BrowserMultiFormatReader, Result, BarcodeFormat } from '@zxing/library';
+import { BrowserMultiFormatReader, Result, BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { Barcode } from 'lucide-react';
 
 interface BarcodeScannerProps {
@@ -18,11 +18,9 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   useEffect(() => {
     // Initialize the barcode reader when component mounts
-    const codeReader = new BrowserMultiFormatReader();
-    
-    // Set preferred formats to optimize detection
-    codeReader.hints.set(
-      2, // DecodeHintType.POSSIBLE_FORMATS
+    const hints = new Map();
+    hints.set(
+      DecodeHintType.POSSIBLE_FORMATS,
       [
         BarcodeFormat.EAN_13,
         BarcodeFormat.EAN_8,
@@ -32,6 +30,8 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         BarcodeFormat.CODE_39,
       ]
     );
+    
+    const codeReader = new BrowserMultiFormatReader(hints);
 
     const startCamera = async () => {
       try {
