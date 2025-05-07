@@ -5,82 +5,87 @@
 
 @layer base {
   :root {
+    /* Main color scheme - Light mode */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 174 30% 55%;  /* #68B0AB typography color */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%; 
+    --card-foreground: 174 30% 55%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 174 30% 55%;
 
-    --primary: 211 100% 50%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 174 30% 55%;  /* #68B0AB typography color */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 79 26% 78%;  /* #C8D5B9 accent color */
+    --secondary-foreground: 150 26% 39%;  /* #4A7C59 detail color */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 79 26% 95%;
+    --muted-foreground: 174 15% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 79 26% 78%;  /* #C8D5B9 accent color */
+    --accent-foreground: 150 26% 39%;  /* #4A7C59 detail color */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 79 26% 85%;
+    --input: 79 26% 85%;
+    --ring: 174 30% 55%;  /* #68B0AB typography color */
 
     --radius: 0.5rem;
 
+    /* Sidebar styles */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 174 30% 55%;
+    --sidebar-primary: 174 30% 55%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 79 26% 95%;
+    --sidebar-accent-foreground: 150 26% 39%;
+    --sidebar-border: 79 26% 90%;
+    --sidebar-ring: 174 30% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Main color scheme - Dark mode */
+    --background: 150 26% 15%;  /* Darker version of the detail color */
+    --foreground: 174 30% 80%;  /* Lighter version of typography color */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 150 26% 20%;
+    --card-foreground: 174 30% 80%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 150 26% 20%;
+    --popover-foreground: 174 30% 80%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 174 30% 65%;  /* Lighter version of typography color */
+    --primary-foreground: 150 26% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 79 26% 50%;  /* Darker version of accent color */
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 150 26% 25%;
+    --muted-foreground: 174 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 79 26% 50%;  /* Darker version of accent color */
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 40.6%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 150 26% 30%;
+    --input: 150 26% 30%;
+    --ring: 174 30% 65%;  /* Lighter version of typography color */
+
+    /* Sidebar Dark styles */
+    --sidebar-background: 150 26% 15%;
+    --sidebar-foreground: 174 30% 80%;
+    --sidebar-primary: 174 30% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 150 26% 25%;
+    --sidebar-accent-foreground: 174 30% 80%;
+    --sidebar-border: 150 26% 30%;
+    --sidebar-ring: 174 30% 65%;
   }
 }
 
@@ -91,7 +96,120 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight text-primary;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl;
+  }
+
+  h6 {
+    @apply text-base md:text-lg;
+  }
+
+  p {
+    @apply leading-7;
+  }
+
+  .lead {
+    @apply text-xl text-muted-foreground;
+  }
+
+  blockquote {
+    @apply mt-6 border-l-2 border-accent pl-6 italic;
+  }
+
+  ul {
+    @apply my-6 ml-6 list-disc [&>li]:mt-2;
+  }
+
+  ol {
+    @apply my-6 ml-6 list-decimal [&>li]:mt-2;
+  }
+
+  code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm;
+  }
+}
+
+/* Utility Classes for Spacing System */
+@layer utilities {
+  .spacing-0 {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .spacing-1 {
+    margin: 0.25rem;
+    padding: 0.25rem;
+  }
+  
+  .spacing-2 {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .spacing-3 {
+    margin: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .spacing-4 {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .spacing-6 {
+    margin: 1.5rem;
+    padding: 1.5rem;
+  }
+  
+  .spacing-8 {
+    margin: 2rem;
+    padding: 2rem;
+  }
+  
+  .spacing-12 {
+    margin: 3rem;
+    padding: 3rem;
+  }
+  
+  .spacing-16 {
+    margin: 4rem;
+    padding: 4rem;
+  }
+}
+
+/* Accessibility Focus Styles */
+@layer utilities {
+  .focus-visible-outline {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}
+
+/* Component specific styles */
+.button-with-icon {
+  @apply inline-flex items-center justify-center gap-2;
 }
 
 /* Custom styling for the scanner */
@@ -104,7 +222,7 @@
   position: absolute;
   width: 100%;
   height: 2px;
-  background-color: #3182CE;
+  background-color: #68B0AB;
   animation: scanning-line 2s infinite ease-in-out;
 }
 
