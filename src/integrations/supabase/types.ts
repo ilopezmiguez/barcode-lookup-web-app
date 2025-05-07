@@ -12,18 +12,21 @@ export type Database = {
       products: {
         Row: {
           barcode_number: string
+          category: string | null
           id: number
           price: number
           product_name: string
         }
         Insert: {
           barcode_number?: string
+          category?: string | null
           id?: number
           price: number
           product_name?: string
         }
         Update: {
           barcode_number?: string
+          category?: string | null
           id?: number
           price?: number
           product_name?: string

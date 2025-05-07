@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,11 +6,13 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import ProductDisplay from '@/components/ProductDisplay';
 import { Barcode } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface Product {
   product_name: string;
   price: number;
   barcode_number: string;
+  category?: string | null;
 }
 
 const Index = () => {
@@ -35,10 +38,10 @@ const Index = () => {
     setProduct(null);
     
     try {
-      // Query the Supabase database for the product
+      // Query the Supabase database for the product, now also fetching category
       const { data, error } = await supabase
         .from('products')
-        .select('product_name, price, barcode_number')
+        .select('product_name, price, barcode_number, category')
         .eq('barcode_number', barcode)
         .single();
       
@@ -92,6 +95,13 @@ const Index = () => {
     setIsScanning(true);
   };
 
+  // Handle history item selection
+  const handleHistoryItemClick = (historyProduct: Product) => {
+    setProduct(historyProduct);
+    setScannedBarcode(historyProduct.barcode_number);
+    // No need to fetch from the database again as we already have the product data
+  };
+
   // Initialize scanning when the component mounts
   useEffect(() => {
     if (!isScanning && !scannedBarcode) {
@@ -108,9 +118,12 @@ const Index = () => {
             <Barcode className="h-8 w-8 text-blue-600 mr-2" />
             <h1 className="text-2xl font-bold text-gray-900">Product Scanner</h1>
           </div>
-          <p className="text-gray-600">
-            Scan a product barcode to view details from our database
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-gray-600">
+              Scan a product barcode to view details from our database
+            </p>
+            <ThemeToggle />
+          </div>
         </div>
         
         {/* Scanner */}
@@ -125,6 +138,7 @@ const Index = () => {
           isLoading={isLoading} 
           error={error}
           scannedBarcode={scannedBarcode}
+          onHistoryItemClick={handleHistoryItemClick}
         />
         
         {/* Controls */}
@@ -155,7 +169,7 @@ const Index = () => {
         {/* Development info */}
         <div className="mt-12 text-center text-xs text-gray-500">
           <p>Note: Please connect to Supabase and set up your products database.</p>
-          <p className="mt-1">Update the Supabase credentials in src/lib/supabase.ts</p>
+          <p className="mt-1">Make sure to add the 'category' field to your products table.</p>
         </div>
       </div>
     </div>
