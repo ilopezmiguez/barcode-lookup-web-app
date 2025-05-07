@@ -38,7 +38,6 @@ const Index = () => {
     setProduct(null);
     
     try {
-      // Query the Supabase database for the product, now also fetching category
       const { data, error } = await supabase
         .from('products')
         .select('product_name, price, barcode_number, category')
@@ -110,16 +109,16 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
+    <div className="min-h-screen bg-background px-4 py-8">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Barcode className="h-8 w-8 text-blue-600 mr-2" />
-            <h1 className="text-2xl font-bold text-gray-900">Product Scanner</h1>
+            <Barcode className="h-8 w-8 text-primary mr-2" />
+            <h1 className="text-2xl font-bold">Product Scanner</h1>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Scan a product barcode to view details from our database
             </p>
             <ThemeToggle />
@@ -127,27 +126,29 @@ const Index = () => {
         </div>
         
         {/* Scanner */}
-        <BarcodeScanner 
-          onBarcodeDetected={handleBarcodeDetected} 
-          isScanning={isScanning} 
-        />
+        <div className="mb-6">
+          <BarcodeScanner 
+            onBarcodeDetected={handleBarcodeDetected} 
+            isScanning={isScanning} 
+          />
+        </div>
         
         {/* Product Information */}
-        <ProductDisplay 
-          product={product} 
-          isLoading={isLoading} 
-          error={error}
-          scannedBarcode={scannedBarcode}
-          onHistoryItemClick={handleHistoryItemClick}
-        />
+        <div className="mb-6">
+          <ProductDisplay 
+            product={product} 
+            isLoading={isLoading} 
+            error={error}
+            scannedBarcode={scannedBarcode}
+            onHistoryItemClick={handleHistoryItemClick}
+          />
+        </div>
         
         {/* Controls */}
         <div className="mt-6 flex justify-center space-x-4">
           {!isScanning && (
             <Button 
               onClick={startScanning} 
-              variant="outline"
-              className="bg-blue-500 text-white hover:bg-blue-600"
               disabled={isLoading}
             >
               Resume Scanning
@@ -158,7 +159,6 @@ const Index = () => {
             <Button 
               onClick={resetScanner} 
               variant="outline"
-              className="border-gray-300"
               disabled={isLoading}
             >
               Scan New Barcode
@@ -167,7 +167,7 @@ const Index = () => {
         </div>
         
         {/* Development info */}
-        <div className="mt-12 text-center text-xs text-gray-500">
+        <div className="mt-12 text-center text-xs text-muted-foreground">
           <p>Note: Please connect to Supabase and set up your products database.</p>
           <p className="mt-1">Make sure to add the 'category' field to your products table.</p>
         </div>
