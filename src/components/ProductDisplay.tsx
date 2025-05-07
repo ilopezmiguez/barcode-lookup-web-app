@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +8,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import ProductCard from './ProductCard';
-import { ChevronDown, ChevronUp, Clock, Tag } from 'lucide-react';
+import ReportMissingProductDialog from './ReportMissingProductDialog';
+import { ChevronDown, ChevronUp, Clock, Tag, AlertTriangle } from 'lucide-react';
 
 interface Product {
   product_name: string;
@@ -31,6 +33,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, isLoading, err
   const [isRelatedOpen, setIsRelatedOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showAllRelated, setShowAllRelated] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
 
   // Load scan history from localStorage on component mount
   useEffect(() => {
@@ -110,14 +113,32 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, isLoading, err
 
   if (!product && scannedBarcode) {
     return (
-      <Card className="bg-muted/20">
-        <CardHeader>
-          <CardTitle className="text-muted-foreground">No Product Found</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>No product found with barcode: {scannedBarcode}</p>
-        </CardContent>
-      </Card>
+      <>
+        <Card className="bg-muted/20">
+          <CardHeader>
+            <CardTitle className="text-muted-foreground flex items-center">
+              <AlertTriangle className="mr-2 h-5 w-5 text-amber-500" />
+              No Product Found
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">No product found with barcode: {scannedBarcode}</p>
+            <Button 
+              variant="secondary"
+              onClick={() => setIsReportDialogOpen(true)}
+              className="w-full"
+            >
+              Report Missing Product
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <ReportMissingProductDialog 
+          open={isReportDialogOpen} 
+          onOpenChange={setIsReportDialogOpen}
+          scannedBarcode={scannedBarcode}
+        />
+      </>
     );
   }
 

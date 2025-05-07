@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      missing_products: {
+        Row: {
+          barcode_number: string | null
+          description: string
+          id: string
+          reported_at: string
+        }
+        Insert: {
+          barcode_number?: string | null
+          description: string
+          id?: string
+          reported_at?: string
+        }
+        Update: {
+          barcode_number?: string | null
+          description?: string
+          id?: string
+          reported_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode_number: string
