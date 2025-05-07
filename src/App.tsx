@@ -18,7 +18,7 @@ const basename = import.meta.env.PROD ? '/barcode-lookup-web-app/' : '/';
 
 const App = () => (
   <StrictMode>
-    <ThemeProvider defaultTheme="light">
+    <ThemeProvider defaultTheme="system">
       <BrowserRouter basename={basename}>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
