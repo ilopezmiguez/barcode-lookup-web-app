@@ -125,7 +125,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
   if (!product) {
     return <Card className="bg-muted/20">
         <CardHeader>
-          <CardTitle className="text-muted-foreground">Listo para escanea</CardTitle>
+          <CardTitle className="text-muted-foreground">Listo para escanear</CardTitle>
         </CardHeader>
         <CardContent>
           <p>Position a barcode in the scanner area to get product information.</p>
