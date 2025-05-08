@@ -55,6 +55,8 @@ export function MissingProductsList({ missingProducts, isLoading, error }: Missi
     );
   }
   
+  console.log('Rendering products list with data:', missingProducts);
+  
   // Products table
   return (
     <div className="border rounded-md overflow-hidden">
