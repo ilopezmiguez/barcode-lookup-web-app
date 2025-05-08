@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 interface MissingProduct {
   id: string;
@@ -25,11 +24,9 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
     try {
       console.log('Fetching missing products...');
       
-      // Use the specific query structure requested
       const { data, error } = await supabase
         .from('missing_products')
-        .select('barcode_number, description, reported_at, id')
-        .order('reported_at', { ascending: false });
+        .select('barcode_number, description, reported_at, id');
       
       if (error) {
         console.error('Error from Supabase:', error);
