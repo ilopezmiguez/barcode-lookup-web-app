@@ -9,15 +9,9 @@ if (redirect) {
   // Clear the sessionStorage
   delete sessionStorage.redirect;
   
-  // Get the basename from environment
-  const basename = import.meta.env.BASE_URL || '/barcode-lookup-web-app/';
-  
-  // Extract the redirect path and navigate to it
-  const path = redirect;
-  
   // Use history API to navigate to the intended URL
-  if (path !== basename && !path.startsWith(basename + 'assets/')) {
-    window.history.replaceState(null, '', path);
+  if (redirect !== '/barcode-lookup-web-app/' && !redirect.startsWith('/barcode-lookup-web-app/assets/')) {
+    window.history.replaceState(null, '', redirect);
   }
 }
 

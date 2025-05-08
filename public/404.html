@@ -5,19 +5,12 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // Store the current path in sessionStorage when a 404 occurs
-    const pathSegmentsToKeep = 1;
-    const l = window.location;
-    
-    // Save the full URL to sessionStorage
-    sessionStorage.redirect = l.pathname + l.search + l.hash;
-    
-    // Redirect to the base URL
-    window.location.href = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
-      l.pathname.split('/').slice(0, pathSegmentsToKeep + 1).join('/') + '/';
+    // Single-page application navigation
+    sessionStorage.redirect = window.location.pathname + window.location.search + window.location.hash;
+    window.location.href = "/barcode-lookup-web-app/";
   </script>
 </head>
 <body>
-  Redirecting...
+  <p>Redirecting to main page...</p>
 </body>
 </html>

@@ -13,8 +13,8 @@ import DesignSystem from "./pages/DesignSystem";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-// Use the VITE_BASE_URL or fallback to the repository name
-const basename = import.meta.env.BASE_URL || '/barcode-lookup-web-app/';
+// Always use the repository name as the basename for consistency
+const basename = '/barcode-lookup-web-app/';
 
 const App = () => (
   <StrictMode>
