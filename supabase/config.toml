@@ -23,3 +23,6 @@ port = 54325
 
 [functions.send-missing-products-report]
 verify_jwt = true
+
+[functions.clear-missing-products]
+verify_jwt = true
