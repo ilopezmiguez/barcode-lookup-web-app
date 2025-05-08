@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 // Initialize Resend with the API key stored in Supabase secrets
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resend = new Resend(Deno.env.get("RESEND_KEY"));
 
 interface MissingProduct {
   id: string;
