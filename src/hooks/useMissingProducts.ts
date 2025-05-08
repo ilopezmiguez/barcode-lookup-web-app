@@ -24,10 +24,11 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
     
     try {
       console.log('Fetching missing products...');
-      // Query with explicit columns
+      
+      // Use the specific query structure requested
       const { data, error } = await supabase
         .from('missing_products')
-        .select('id, barcode_number, reported_at, description')
+        .select('barcode_number, description, reported_at, id')
         .order('reported_at', { ascending: false });
       
       if (error) {
