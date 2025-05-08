@@ -7,6 +7,7 @@ import ProductDisplay from '@/components/ProductDisplay';
 import { Barcode } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import ManagerTools from '@/components/ManagerTools';
 
 interface Product {
   product_name: string;
@@ -109,7 +110,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
+    <div className="min-h-screen bg-background px-4 py-8 pb-16">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -172,6 +173,9 @@ const Index = () => {
           <p className="mt-1">Make sure to add the 'category' field to your products table.</p>
         </div>
       </div>
+      
+      {/* Manager Tools */}
+      <ManagerTools />
     </div>
   );
 };

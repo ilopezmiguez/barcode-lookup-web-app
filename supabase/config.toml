@@ -1,1 +1,4 @@
+
 project_id = "ztfacqwmzcyvezwtihyp"
+[functions.clear-missing-products]
+verify_jwt = false
