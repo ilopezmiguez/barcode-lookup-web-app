@@ -96,6 +96,10 @@ const handler = async (req: Request): Promise<Response> => {
     const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     const filename = `missing_products_${date}.csv`;
     
+    // In Deno, we need to encode string to base64 manually since Buffer is not available
+    // This uses the native TextEncoder and btoa functions
+    const base64Csv = btoa(csvData);
+    
     // Send email with CSV attachment
     const toEmails = ["pablowlopez@gmail.com", "ilopezmiguez.development@gmail.com"];
     const emailResponse = await resend.emails.send({
@@ -107,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
       attachments: [
         {
           filename,
-          content: Buffer.from(csvData).toString("base64"),
+          content: base64Csv,
           type: "text/csv",
         },
       ],
