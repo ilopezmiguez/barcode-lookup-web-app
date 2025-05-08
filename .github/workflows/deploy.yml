@@ -43,3 +43,8 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
+          clean: true # Automatically removes deleted files from the deploy branch
+          clean-exclude: |
+            .nojekyll
+            CNAME
+          force: true # Force push by using the --force flag when pushing to the deploy branch
