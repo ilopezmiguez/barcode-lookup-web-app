@@ -6,7 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, Loader, Settings, X } from 'lucide-react';
+import { Check, ExternalLink, Loader, Settings, X } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 
 const ManagerTools: React.FC = () => {
@@ -95,6 +95,20 @@ const ManagerTools: React.FC = () => {
                   Clear list after sending?
                 </label>
               </div>
+              
+              <Alert className="bg-amber-50 text-amber-800 border-amber-200">
+                <AlertDescription className="text-xs flex items-center gap-2">
+                  <span>During testing, reports will only be sent to your verified email address. To send to other recipients, you need to verify a domain in Resend.</span>
+                  <a 
+                    href="https://resend.com/domains" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 hover:underline"
+                  >
+                    Verify domain <ExternalLink className="h-3 w-3 ml-1" />
+                  </a>
+                </AlertDescription>
+              </Alert>
               
               {status !== 'idle' && (
                 <Alert variant={status === 'error' ? 'destructive' : status === 'success' ? 'default' : 'default'}>

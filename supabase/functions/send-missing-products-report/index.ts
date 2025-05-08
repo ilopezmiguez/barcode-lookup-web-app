@@ -101,13 +101,18 @@ const handler = async (req: Request): Promise<Response> => {
     const base64Csv = btoa(csvData);
     
     // Send email with CSV attachment
-    const toEmails = ["pablowlopez@gmail.com", "ilopezmiguez.development@gmail.com"];
+    // Use only your verified email (the one linked to your Resend account) for both from and to
+    // during testing
+    const verifiedEmail = "ilopezmiguez.development@gmail.com";
+    
     const emailResponse = await resend.emails.send({
-      from: "Barcode Scanner <onboarding@resend.dev>",
-      to: toEmails,
+      from: `Barcode Scanner <${verifiedEmail}>`,
+      to: [verifiedEmail],
       subject: `Missing Products Report - ${date}`,
       html: `<p>Attached is the list of products scanned but not found in the database as of ${new Date().toLocaleString()}.</p>
-             <p>Total missing products: ${missingProducts.length}</p>`,
+             <p>Total missing products: ${missingProducts.length}</p>
+             <p>Note: This email is currently sent only to your verified email address because Resend is in test mode. 
+             To send emails to other recipients, please verify a domain at <a href="https://resend.com/domains">resend.com/domains</a>.</p>`,
       attachments: [
         {
           filename,
@@ -139,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Report sent successfully to ${toEmails.join(", ")}${clearList ? " and list cleared" : ""}` 
+        message: `Report sent successfully to ${verifiedEmail}${clearList ? " and list cleared" : ""}` 
       }),
       { 
         status: 200, 
