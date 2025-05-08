@@ -28,13 +28,18 @@ export function ManagerTools() {
     setError(null);
     
     try {
+      console.log('Fetching missing products...');
       const { data, error } = await supabase
         .from('missing_products')
         .select('id, barcode_number, reported_at, description')
         .order('reported_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error from Supabase:', error);
+        throw error;
+      }
       
+      console.log('Fetched data:', data);
       setMissingProducts(data || []);
     } catch (err) {
       console.error('Error fetching missing products:', err);
@@ -102,9 +107,12 @@ export function ManagerTools() {
     setIsClearing(true);
     
     try {
+      console.log('Invoking clear-missing-products function...');
       const response = await supabase.functions.invoke('clear-missing-products', {
         method: 'POST',
       });
+      
+      console.log('Clear function response:', response);
       
       if (!response.data.success) {
         throw new Error(response.data.error || 'Error al vaciar la lista');
@@ -132,6 +140,7 @@ export function ManagerTools() {
   // Fetch data when the collapsible is opened
   useEffect(() => {
     if (isOpen) {
+      console.log('ManagerTools opened, fetching data...');
       fetchMissingProducts();
     }
   }, [isOpen]);
