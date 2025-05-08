@@ -13,8 +13,8 @@ import DesignSystem from "./pages/DesignSystem";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-// Always use the repository name as the basename for consistency
-const basename = '/barcode-lookup-web-app/';
+// Check if we're in production to use the correct basename for GitHub Pages
+const basename = import.meta.env.PROD ? '/barcode-lookup-web-app/' : '/';
 
 const App = () => (
   <StrictMode>
