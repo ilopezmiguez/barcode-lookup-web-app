@@ -4,24 +4,12 @@
 <head>
   <meta charset="utf-8">
   <title>Redirecting...</title>
-  <script src="404.js"></script>
-  <script type="text/javascript">
-    // Single Page Apps for GitHub Pages
-    // MIT License
-    // https://github.com/rafgraph/spa-github-pages
-    var l = window.location;
+  <script>
+    // Store the current path in sessionStorage when a 404 occurs
+    sessionStorage.redirect = window.location.href;
     
-    // Extract the path and query from the URL
-    var path = l.pathname.split('/barcode-lookup-web-app/')[1] || '';
-    
-    // Redirect to the root with the path as a parameter
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      '/barcode-lookup-web-app/' + 
-      (path ? '?' + path.split('&').map(function(s) { return s.replace(/&/g, '~and~'); }).join('&') : '') +
-      (l.search ? (path ? '&' : '?') + l.search.slice(1) : '') +
-      l.hash
-    );
+    // Redirect to the index page
+    window.location.href = "/barcode-lookup-web-app/";
   </script>
 </head>
 <body>
