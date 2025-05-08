@@ -29,6 +29,7 @@ export function ManagerTools() {
     
     try {
       console.log('Fetching missing products...');
+      // Simplified query with explicit columns
       const { data, error } = await supabase
         .from('missing_products')
         .select('id, barcode_number, reported_at, description')

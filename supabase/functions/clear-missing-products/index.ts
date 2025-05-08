@@ -1,67 +1,66 @@
 
-// Follow this setup guide to integrate the Deno runtime into your application:
-// https://deno.com/manual/getting_started/setup_your_environment
-// This enables autocomplete, typechecking, etc.
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.22.0';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.3";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Create a Supabase client with the service role key
-const supabaseUrl = 'https://ztfacqwmzcyvezwtihyp.supabase.co';
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-Deno.serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ success: false, error: 'Method not allowed' }),
-      {
-        status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // Create a Supabase client with the Admin key
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+
+    console.log("Deleting all records from missing_products table");
+    
     // Delete all records from the missing_products table
-    const { error } = await supabase
-      .from('missing_products')
+    const { error } = await supabaseClient
+      .from("missing_products")
       .delete()
-      .neq('id', null); // This is a trick to delete all records
+      .neq("id", "impossible-id"); // Using a condition to delete all rows
+    
+    if (error) {
+      console.error("Error deleting records:", error);
+      throw error;
+    }
 
-    if (error) throw error;
-
-    // Return a success response
+    console.log("Successfully deleted all records from missing_products table");
+    
+    // Return success response
     return new Response(
-      JSON.stringify({ success: true, message: 'Lista vaciada exitosamente' }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      JSON.stringify({ success: true }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          "Content-Type": "application/json" 
+        },
+        status: 200 
       }
     );
   } catch (error) {
-    console.error('Error clearing missing products:', error);
+    console.error("Function execution error:", error);
     
-    // Return an error response
+    // Return error response
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
+        error: error.message || "An unknown error occurred" 
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      { 
+        headers: { 
+          ...corsHeaders,
+          "Content-Type": "application/json" 
+        },
+        status: 400 
       }
     );
   }
