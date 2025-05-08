@@ -64,16 +64,16 @@ export function MissingProductsList({ missingProducts, isLoading, error }: Missi
         <TableHeader>
           <TableRow>
             <TableHead>Código de Barras</TableHead>
-            <TableHead>Fecha Reportado</TableHead>
             <TableHead>Descripción</TableHead>
+            <TableHead>Fecha Reportado</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {missingProducts.map((product) => (
             <TableRow key={product.id}>
               <TableCell className="font-mono">{product.barcode_number || "N/A"}</TableCell>
-              <TableCell>{formatDate(product.reported_at)}</TableCell>
               <TableCell>{product.description || "Sin descripción"}</TableCell>
+              <TableCell>{formatDate(product.reported_at)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -36,8 +36,8 @@ const ReportMissingProductDialog: React.FC<ReportMissingProductProps> = ({
     
     if (!formData.description) {
       toast({
-        title: "Description required",
-        description: "Please provide a description of the missing product.",
+        title: "Descripción requerida",
+        description: "Por favor provee una descripción del producto faltante.",
         variant: "destructive"
       });
       return;
@@ -53,16 +53,16 @@ const ReportMissingProductDialog: React.FC<ReportMissingProductProps> = ({
       if (error) throw error;
       
       toast({
-        title: "Report submitted",
-        description: "Thank you for reporting this missing product.",
+        title: "Reporte enviado",
+        description: "Gracias por reportar este producto faltante.",
       });
       
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting report:', error);
       toast({
-        title: "Submission failed",
-        description: "There was an error submitting your report. Please try again.",
+        title: "Error al enviar",
+        description: "Hubo un error al enviar tu reporte. Por favor intenta de nuevo.",
         variant: "destructive"
       });
     } finally {
@@ -75,32 +75,32 @@ const ReportMissingProductDialog: React.FC<ReportMissingProductProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Report Missing Product</DialogTitle>
+            <DialogTitle>Reportar Producto Faltante</DialogTitle>
             <DialogDescription>
-              Help us improve our database by providing details about the missing product.
+              Ayúdanos a mejorar nuestra base de datos proporcionando detalles sobre el producto faltante.
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="barcode_number">Barcode Number (Optional)</Label>
+              <Label htmlFor="barcode_number">Código de Barras (Opcional)</Label>
               <Input
                 id="barcode_number"
                 name="barcode_number"
                 value={formData.barcode_number}
                 onChange={handleChange}
-                placeholder="Enter or edit barcode number"
+                placeholder="Ingresa o edita el código de barras"
               />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
+              <Label htmlFor="description">Descripción <span className="text-destructive">*</span></Label>
               <Textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Please describe the product (name, brand, etc.)"
+                placeholder="Por favor describe el producto (nombre, marca, etc.)"
                 rows={4}
                 required
               />
@@ -109,10 +109,10 @@ const ReportMissingProductDialog: React.FC<ReportMissingProductProps> = ({
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Report'}
+              {isSubmitting ? 'Enviando...' : 'Enviar Reporte'}
             </Button>
           </DialogFooter>
         </form>

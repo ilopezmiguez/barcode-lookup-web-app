@@ -54,9 +54,9 @@ const Index = () => {
           setProduct(null);
         } else {
           // This is an actual error
-          setError(`Database error: ${error.message}`);
+          setError(`Error de base de datos: ${error.message}`);
           toast({
-            title: "Error looking up product",
+            title: "Error al buscar producto",
             description: error.message,
             variant: "destructive"
           });
@@ -64,13 +64,13 @@ const Index = () => {
       } else if (data) {
         setProduct(data);
         toast({
-          title: "Product found",
-          description: `Found ${data.product_name}`,
+          title: "Producto encontrado",
+          description: `Se encontró ${data.product_name}`,
         });
       }
     } catch (err) {
       console.error('Product lookup error:', err);
-      setError('Failed to look up product. Please check your connection and try again.');
+      setError('No se pudo buscar el producto. Por favor verifica tu conexión e intenta de nuevo.');
       
       if (err instanceof Error) {
         toast({
@@ -120,7 +120,7 @@ const Index = () => {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
-              Scan a product barcode to view details from our database
+              Escanea el código de barras de un producto para ver los detalles de nuestra base de datos
             </p>
             <ThemeToggle />
           </div>
@@ -152,7 +152,7 @@ const Index = () => {
               onClick={startScanning} 
               disabled={isLoading}
             >
-              Resume Scanning
+              Continuar Escaneando
             </Button>
           )}
           
@@ -162,15 +162,15 @@ const Index = () => {
               variant="outline"
               disabled={isLoading}
             >
-              Scan New Barcode
+              Escanear Nuevo Código
             </Button>
           )}
         </div>
         
         {/* Development info */}
         <div className="mt-12 text-center text-xs text-muted-foreground">
-          <p>Note: Please connect to Supabase and set up your products database.</p>
-          <p className="mt-1">Make sure to add the 'category' field to your products table.</p>
+          <p>Nota: Por favor conecta a Supabase y configura tu base de datos de productos.</p>
+          <p className="mt-1">Asegúrate de añadir el campo 'category' a tu tabla de productos.</p>
         </div>
       </div>
       
