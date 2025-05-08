@@ -4,13 +4,27 @@
 <head>
   <meta charset="utf-8">
   <title>Redirecting...</title>
-  <script>
-    // Single-page application navigation
-    sessionStorage.redirect = window.location.pathname + window.location.search + window.location.hash;
-    window.location.href = "/barcode-lookup-web-app/";
+  <script src="404.js"></script>
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages
+    // MIT License
+    // https://github.com/rafgraph/spa-github-pages
+    var l = window.location;
+    
+    // Extract the path and query from the URL
+    var path = l.pathname.split('/barcode-lookup-web-app/')[1] || '';
+    
+    // Redirect to the root with the path as a parameter
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      '/barcode-lookup-web-app/' + 
+      (path ? '?' + path.split('&').map(function(s) { return s.replace(/&/g, '~and~'); }).join('&') : '') +
+      (l.search ? (path ? '&' : '?') + l.search.slice(1) : '') +
+      l.hash
+    );
   </script>
 </head>
 <body>
-  <p>Redirecting to main page...</p>
+  Redirecting...
 </body>
 </html>
