@@ -28,7 +28,7 @@ export function ActionButtons({
         disabled={isLoading || !hasProducts}
       >
         <Copy size={16} />
-        {isCopied ? "¡Copiado!" : "Copiar Lista de Códigos"}
+        {isCopied ? "¡Copiado!" : "Copiar datos en CSV"}
       </Button>
       
       <Button 

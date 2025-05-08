@@ -48,27 +48,36 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
     }
   };
   
-  // Copy barcodes to clipboard
+  // Copy barcodes to clipboard in CSV format
   const copyBarcodesToClipboard = () => {
-    const barcodeList = missingProducts
-      .map(product => product.barcode_number)
-      .filter(Boolean)
+    // Create CSV format with barcode and description (header row + data rows)
+    const csvHeader = "código_barras,descripción\n";
+    const csvContent = missingProducts
+      .map(product => {
+        const barcode = product.barcode_number || "";
+        const description = product.description || "";
+        // Properly escape the description for CSV (wrap in quotes and escape any quotes inside)
+        const escapedDescription = `"${description.replace(/"/g, '""')}"`;
+        return `${barcode},${escapedDescription}`;
+      })
       .join('\n');
     
-    if (!barcodeList) {
+    const fullCsvContent = csvHeader + csvContent;
+    
+    if (missingProducts.length === 0) {
       toast({
         title: "Información",
-        description: "No hay códigos de barras para copiar",
+        description: "No hay datos para copiar",
       });
       return;
     }
     
-    navigator.clipboard.writeText(barcodeList)
+    navigator.clipboard.writeText(fullCsvContent)
       .then(() => {
         setIsCopied(true);
         toast({
           title: "¡Éxito!",
-          description: "Lista de códigos copiada al portapapeles",
+          description: "Datos copiados en formato CSV al portapapeles",
         });
         
         // Reset the copied state after 2 seconds
