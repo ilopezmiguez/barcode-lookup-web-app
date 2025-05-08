@@ -34,6 +34,7 @@ export type Database = {
         Row: {
           barcode_number: string
           category: string | null
+          family: string | null
           id: number
           price: number
           product_name: string
@@ -41,6 +42,7 @@ export type Database = {
         Insert: {
           barcode_number?: string
           category?: string | null
+          family?: string | null
           id?: number
           price: number
           product_name?: string
@@ -48,6 +50,7 @@ export type Database = {
         Update: {
           barcode_number?: string
           category?: string | null
+          family?: string | null
           id?: number
           price?: number
           product_name?: string
