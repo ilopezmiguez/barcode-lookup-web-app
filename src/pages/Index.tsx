@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,22 +7,21 @@ import { Barcode } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import ManagerTools from '@/components/ManagerTools';
-
 interface Product {
   product_name: string;
   price: number;
   barcode_number: string;
   category?: string | null;
 }
-
 const Index = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleBarcodeDetected = async (barcode: string) => {
     // Only process if it's a new barcode or first scan
     if (barcode !== scannedBarcode) {
@@ -32,22 +30,18 @@ const Index = () => {
       await lookupProduct(barcode);
     }
   };
-
   const lookupProduct = async (barcode: string) => {
     setIsLoading(true);
     setError(null);
     setProduct(null);
-    
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('product_name, price, barcode_number, category')
-        .eq('barcode_number', barcode)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('products').select('product_name, price, barcode_number, category').eq('barcode_number', barcode).single();
       if (error) {
         console.error('Supabase query error:', error);
-        
+
         // Check if it's a "not found" error
         if (error.code === 'PGRST116') {
           // This is not really an error, just no results
@@ -65,13 +59,12 @@ const Index = () => {
         setProduct(data);
         toast({
           title: "Producto encontrado",
-          description: `Se encontró ${data.product_name}`,
+          description: `Se encontró ${data.product_name}`
         });
       }
     } catch (err) {
       console.error('Product lookup error:', err);
       setError('No se pudo buscar el producto. Por favor verifica tu conexión e intenta de nuevo.');
-      
       if (err instanceof Error) {
         toast({
           title: "Error",
@@ -83,11 +76,9 @@ const Index = () => {
       setIsLoading(false);
     }
   };
-
   const startScanning = () => {
     setIsScanning(true);
   };
-
   const resetScanner = () => {
     setScannedBarcode(null);
     setProduct(null);
@@ -108,9 +99,7 @@ const Index = () => {
       startScanning();
     }
   }, []);
-
-  return (
-    <div className="min-h-screen bg-background px-4 py-8 pb-16">
+  return <div className="min-h-screen bg-background px-4 py-8 pb-16">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -128,56 +117,34 @@ const Index = () => {
         
         {/* Scanner */}
         <div className="mb-6">
-          <BarcodeScanner 
-            onBarcodeDetected={handleBarcodeDetected} 
-            isScanning={isScanning} 
-          />
+          <BarcodeScanner onBarcodeDetected={handleBarcodeDetected} isScanning={isScanning} />
         </div>
         
         {/* Product Information */}
         <div className="mb-6">
-          <ProductDisplay 
-            product={product} 
-            isLoading={isLoading} 
-            error={error}
-            scannedBarcode={scannedBarcode}
-            onHistoryItemClick={handleHistoryItemClick}
-          />
+          <ProductDisplay product={product} isLoading={isLoading} error={error} scannedBarcode={scannedBarcode} onHistoryItemClick={handleHistoryItemClick} />
         </div>
         
         {/* Controls */}
         <div className="mt-6 flex justify-center space-x-4">
-          {!isScanning && (
-            <Button 
-              onClick={startScanning} 
-              disabled={isLoading}
-            >
+          {!isScanning && <Button onClick={startScanning} disabled={isLoading}>
               Continuar Escaneando
-            </Button>
-          )}
+            </Button>}
           
-          {scannedBarcode && (
-            <Button 
-              onClick={resetScanner} 
-              variant="outline"
-              disabled={isLoading}
-            >
+          {scannedBarcode && <Button onClick={resetScanner} variant="outline" disabled={isLoading}>
               Escanear Nuevo Código
-            </Button>
-          )}
+            </Button>}
         </div>
         
         {/* Development info */}
         <div className="mt-12 text-center text-xs text-muted-foreground">
-          <p>Nota: Por favor conecta a Supabase y configura tu base de datos de productos.</p>
-          <p className="mt-1">Asegúrate de añadir el campo 'category' a tu tabla de productos.</p>
+          
+          
         </div>
       </div>
       
       {/* Manager Tools */}
       <ManagerTools />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
