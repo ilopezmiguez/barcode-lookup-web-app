@@ -7,6 +7,8 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 import { MissingProductsList } from '@/components/MissingProductsList';
 import { ActionButtons } from '@/components/ActionButtons';
 import { useMissingProducts } from '@/hooks/useMissingProducts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ShelfOrganizer } from '@/components/ShelfOrganizer';
 
 export function ManagerTools() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,26 +35,41 @@ export function ManagerTools() {
         </CollapsibleTrigger>
         
         <CollapsibleContent className="p-4">
-          <div className="max-h-80 overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">Lista de Productos Faltantes</h3>
+          <Tabs defaultValue="missing-products" className="w-full">
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="missing-products" className="flex-1">
+                Productos Faltantes
+              </TabsTrigger>
+              <TabsTrigger value="shelf-organization" className="flex-1">
+                Organización de Estantes
+              </TabsTrigger>
+            </TabsList>
             
-            {/* Actions */}
-            <ActionButtons 
-              copyBarcodesToClipboard={copyBarcodesToClipboard}
-              clearMissingProducts={clearMissingProducts}
-              isLoading={isLoading}
-              isClearing={isClearing}
-              isCopied={isCopied}
-              hasProducts={missingProducts.length > 0}
-            />
+            <TabsContent value="missing-products" className="max-h-80 overflow-y-auto">
+              <h3 className="text-lg font-semibold mb-4">Lista de Productos Faltantes</h3>
+              
+              {/* Actions */}
+              <ActionButtons 
+                copyBarcodesToClipboard={copyBarcodesToClipboard}
+                clearMissingProducts={clearMissingProducts}
+                isLoading={isLoading}
+                isClearing={isClearing}
+                isCopied={isCopied}
+                hasProducts={missingProducts.length > 0}
+              />
+              
+              {/* Products listing */}
+              <MissingProductsList 
+                missingProducts={missingProducts}
+                isLoading={isLoading}
+                error={error}
+              />
+            </TabsContent>
             
-            {/* Products listing */}
-            <MissingProductsList 
-              missingProducts={missingProducts}
-              isLoading={isLoading}
-              error={error}
-            />
-          </div>
+            <TabsContent value="shelf-organization" className="max-h-[calc(80vh-7rem)]">
+              <ShelfOrganizer />
+            </TabsContent>
+          </Tabs>
         </CollapsibleContent>
       </Collapsible>
     </div>

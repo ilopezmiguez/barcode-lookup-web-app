@@ -1,0 +1,191 @@
+
+import { useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface ScannedProduct {
+  barcode: string;
+  timestamp: Date;
+}
+
+export type OrganizerUIState = 
+  | 'idle'
+  | 'awaiting_shelf_id'
+  | 'scanning_shelf'
+  | 'shelf_saved_options';
+
+export function useShelfOrganizer() {
+  // Main event state
+  const [isOrganizing, setIsOrganizing] = useState<boolean>(false);
+  const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+  const [currentShelfId, setCurrentShelfId] = useState<string>('');
+  const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
+  const [uiState, setUiState] = useState<OrganizerUIState>('idle');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  const { toast } = useToast();
+
+  // Start a new organization event
+  const startOrganizationEvent = useCallback(() => {
+    // Generate a random 8-digit event ID
+    const eventId = Math.floor(10000000 + Math.random() * 90000000).toString();
+    setCurrentEventId(eventId);
+    setIsOrganizing(true);
+    setUiState('awaiting_shelf_id');
+    setCurrentShelfId('');
+    setScannedProducts([]);
+    
+    toast({
+      title: "Evento de organización iniciado",
+      description: `ID del evento: ${eventId}`
+    });
+  }, [toast]);
+
+  // Begin scanning for a specific shelf
+  const startShelfScan = useCallback((shelfId: string) => {
+    if (!shelfId.trim()) {
+      toast({
+        title: "Error",
+        description: "Por favor ingrese un código de estante válido",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setCurrentShelfId(shelfId);
+    setScannedProducts([]);
+    setUiState('scanning_shelf');
+    
+    toast({
+      title: "Escaneo iniciado",
+      description: `Escaneando productos para el estante: ${shelfId}`
+    });
+  }, [toast]);
+
+  // Handle a barcode scan
+  const handleProductScan = useCallback((barcode: string) => {
+    if (!isOrganizing || uiState !== 'scanning_shelf') {
+      return;
+    }
+
+    setScannedProducts(prev => [
+      ...prev,
+      { barcode, timestamp: new Date() }
+    ]);
+    
+    // Provide brief visual feedback through toast
+    toast({
+      title: "Producto escaneado",
+      description: `Código: ${barcode}`,
+      duration: 1500
+    });
+  }, [isOrganizing, uiState, toast]);
+
+  // Save the current shelf to Supabase
+  const saveShelf = useCallback(async () => {
+    if (!currentEventId || !currentShelfId || scannedProducts.length === 0) {
+      toast({
+        title: "Error al guardar",
+        description: "No hay productos escaneados para guardar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Prepare data for bulk insert
+      const productsToInsert = scannedProducts.map(product => ({
+        shelf: currentShelfId,
+        barcode_number: product.barcode,
+        event_id: currentEventId
+      }));
+      
+      // Bulk insert into org_products table
+      const { error } = await supabase
+        .from('org_products')
+        .insert(productsToInsert);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Estante guardado exitosamente",
+        description: `Estante '${currentShelfId}' guardado con ${scannedProducts.length} productos.`
+      });
+      
+      // Reset for next shelf
+      setScannedProducts([]);
+      setUiState('shelf_saved_options');
+    } catch (error) {
+      console.error('Error saving shelf:', error);
+      toast({
+        title: "Error al guardar el estante",
+        description: error instanceof Error ? error.message : 'Error desconocido',
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentEventId, currentShelfId, scannedProducts, toast]);
+
+  // Start a new shelf after saving the previous one
+  const startNewShelf = useCallback(() => {
+    setCurrentShelfId('');
+    setUiState('awaiting_shelf_id');
+  }, []);
+
+  // Cancel the current shelf without saving
+  const cancelCurrentShelf = useCallback(() => {
+    if (scannedProducts.length > 0) {
+      if (!window.confirm('¿Está seguro que desea cancelar el estante actual? Se perderán todos los productos escaneados.')) {
+        return;
+      }
+    }
+    
+    setCurrentShelfId('');
+    setScannedProducts([]);
+    setUiState('awaiting_shelf_id');
+  }, [scannedProducts.length]);
+
+  // End the entire organization event
+  const endOrganizationEvent = useCallback(() => {
+    if (scannedProducts.length > 0) {
+      if (!window.confirm('¿Desea terminar el evento sin guardar los cambios en el estante actual?')) {
+        return;
+      }
+    }
+    
+    setIsOrganizing(false);
+    setCurrentEventId(null);
+    setCurrentShelfId('');
+    setScannedProducts([]);
+    setUiState('idle');
+    
+    toast({
+      title: "Evento de organización finalizado",
+      description: "Todos los datos han sido guardados"
+    });
+  }, [scannedProducts.length, toast]);
+
+  return {
+    // State
+    isOrganizing,
+    currentEventId,
+    currentShelfId,
+    scannedProducts,
+    uiState,
+    isLoading,
+    
+    // Actions
+    startOrganizationEvent,
+    startShelfScan,
+    handleProductScan,
+    saveShelf,
+    startNewShelf,
+    cancelCurrentShelf,
+    endOrganizationEvent
+  };
+}

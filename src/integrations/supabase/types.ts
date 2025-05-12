@@ -30,6 +30,30 @@ export type Database = {
         }
         Relationships: []
       }
+      org_products: {
+        Row: {
+          barcode_number: string
+          created_at: string
+          event_id: string
+          id: number
+          shelf: string
+        }
+        Insert: {
+          barcode_number: string
+          created_at?: string
+          event_id: string
+          id?: number
+          shelf: string
+        }
+        Update: {
+          barcode_number?: string
+          created_at?: string
+          event_id?: string
+          id?: number
+          shelf?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode_number: string
