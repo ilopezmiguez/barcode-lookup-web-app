@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface MissingProduct {
   id: string;
@@ -9,7 +10,10 @@ interface MissingProduct {
   description?: string;
 }
 
-export function useMissingProducts(isOpen: boolean, toast: any) {
+export function useMissingProducts(isOpen: boolean) {
+  // Import toast hook directly rather than receiving it as a parameter
+  const { toast } = useToast();
+  
   const [missingProducts, setMissingProducts] = useState<MissingProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
@@ -17,7 +21,7 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
   const [error, setError] = useState<string | null>(null);
   
   // Fetch missing products
-  const fetchMissingProducts = async () => {
+  const fetchMissingProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -46,10 +50,10 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
   
   // Copy barcodes to clipboard in CSV format
-  const copyBarcodesToClipboard = () => {
+  const copyBarcodesToClipboard = useCallback(() => {
     // Create CSV format with barcode and description (header row + data rows)
     const csvHeader = "código_barras,descripción\n";
     const csvContent = missingProducts
@@ -91,10 +95,10 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
           variant: "destructive"
         });
       });
-  };
+  }, [missingProducts, toast]);
   
   // Clear missing products
-  const clearMissingProducts = async () => {
+  const clearMissingProducts = useCallback(async () => {
     if (!missingProducts.length) {
       toast({
         title: "Información",
@@ -138,7 +142,7 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
     } finally {
       setIsClearing(false);
     }
-  };
+  }, [missingProducts.length, fetchMissingProducts, toast]);
   
   // Fetch data when the collapsible is opened
   useEffect(() => {
@@ -146,7 +150,7 @@ export function useMissingProducts(isOpen: boolean, toast: any) {
       console.log('ManagerTools opened, fetching data...');
       fetchMissingProducts();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchMissingProducts]);
   
   return {
     missingProducts,

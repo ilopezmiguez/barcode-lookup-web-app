@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useToast } from "@/hooks/use-toast";
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { MissingProductsList } from '@/components/MissingProductsList';
 import { ActionButtons } from '@/components/ActionButtons';
@@ -12,7 +11,8 @@ import { ShelfOrganizer } from '@/components/ShelfOrganizer';
 
 export function ManagerTools() {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
+  
+  // Pass only the isOpen state to the hook - toast will be obtained inside the hook
   const { 
     missingProducts, 
     isLoading, 
@@ -22,7 +22,7 @@ export function ManagerTools() {
     isClearing, 
     copyBarcodesToClipboard, 
     clearMissingProducts 
-  } = useMissingProducts(isOpen, toast);
+  } = useMissingProducts(isOpen);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-md">
