@@ -20,6 +20,8 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string | undefined>(undefined);
   const [isSamsungDevice, setIsSamsungDevice] = useState<boolean>(false);
+  const lastScannedRef = useRef<string | null>(null);
+  const scanTimeoutRef = useRef<number | null>(null);
 
   // Detect if the device is a Samsung device
   useEffect(() => {
@@ -96,6 +98,11 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         readerRef.current.reset();
         readerRef.current = null;
       }
+      
+      // Clear any pending timeouts
+      if (scanTimeoutRef.current) {
+        clearTimeout(scanTimeoutRef.current);
+      }
     };
   }, [isSamsungDevice]);
 
@@ -148,7 +155,22 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             if (result && isScanning) {
               const barcodeText = result.getText();
               console.log('Barcode detected:', barcodeText);
-              onBarcodeDetected(barcodeText);
+              
+              // Prevent duplicate scans by checking if this is a new barcode
+              // or if enough time has passed since the last scan
+              if (lastScannedRef.current !== barcodeText) {
+                lastScannedRef.current = barcodeText;
+                onBarcodeDetected(barcodeText);
+                
+                // Reset the last scanned code after a delay to allow rescanning the same code later
+                if (scanTimeoutRef.current) {
+                  clearTimeout(scanTimeoutRef.current);
+                }
+                
+                scanTimeoutRef.current = window.setTimeout(() => {
+                  lastScannedRef.current = null;
+                }, 3000); // 3 second cooldown before the same code can be scanned again
+              }
             }
             
             if (error && error.name !== 'NotFoundException') {

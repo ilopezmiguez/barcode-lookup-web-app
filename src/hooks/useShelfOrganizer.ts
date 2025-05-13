@@ -68,18 +68,34 @@ export function useShelfOrganizer() {
       return;
     }
 
-    setScannedProducts(prev => [
-      ...prev,
-      { barcode, timestamp: new Date() }
-    ]);
+    console.log(`Scanning product: ${barcode} for shelf: ${currentShelfId}`);
     
-    // Provide brief visual feedback through toast
-    toast({
-      title: "Producto escaneado",
-      description: `Código: ${barcode}`,
-      duration: 1500
+    setScannedProducts(prev => {
+      // Check if this barcode has already been scanned
+      const isDuplicate = prev.some(product => product.barcode === barcode);
+      
+      if (isDuplicate) {
+        toast({
+          title: "Producto ya escaneado",
+          description: `El código ${barcode} ya ha sido escaneado`,
+          variant: "default"
+        });
+        return prev;
+      }
+      
+      // Add the new product
+      const newProducts = [...prev, { barcode, timestamp: new Date() }];
+      
+      // Provide feedback through toast
+      toast({
+        title: "Producto escaneado",
+        description: `Código: ${barcode}`,
+        duration: 1500
+      });
+      
+      return newProducts;
     });
-  }, [isOrganizing, uiState, toast]);
+  }, [isOrganizing, uiState, currentShelfId, toast]);
 
   // Save the current shelf to Supabase
   const saveShelf = useCallback(async () => {
@@ -101,6 +117,8 @@ export function useShelfOrganizer() {
         barcode_number: product.barcode,
         event_id: currentEventId
       }));
+      
+      console.log("Saving shelf with products:", productsToInsert);
       
       // Bulk insert into org_products table
       const { error } = await supabase
@@ -134,6 +152,7 @@ export function useShelfOrganizer() {
   // Start a new shelf after saving the previous one
   const startNewShelf = useCallback(() => {
     setCurrentShelfId('');
+    setScannedProducts([]);
     setUiState('awaiting_shelf_id');
   }, []);
 
@@ -148,7 +167,12 @@ export function useShelfOrganizer() {
     setCurrentShelfId('');
     setScannedProducts([]);
     setUiState('awaiting_shelf_id');
-  }, [scannedProducts.length]);
+    
+    toast({
+      title: "Estante cancelado",
+      description: "Se han descartado todos los productos escaneados"
+    });
+  }, [scannedProducts.length, toast]);
 
   // End the entire organization event
   const endOrganizationEvent = useCallback(() => {

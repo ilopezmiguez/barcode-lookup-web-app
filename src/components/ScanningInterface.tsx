@@ -79,7 +79,7 @@ export default function ScanningInterface() {
       </Card>
       
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 pb-4">
         <Button 
           variant="destructive" 
           onClick={cancelCurrentShelf} 
@@ -87,7 +87,7 @@ export default function ScanningInterface() {
           disabled={isLoading}
         >
           <X size={18} className="mr-1" />
-          Cancelar Estante
+          Borrar Estante
         </Button>
         
         <Button 
