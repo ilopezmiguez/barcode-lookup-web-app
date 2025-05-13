@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import ManagerTools from '@/components/ManagerTools';
 import { useOrganization } from '@/contexts/OrganizationContext';
-import { barcodeRouter, BarcodeHandlingMode } from '@/services/barcodeRoutingService';
+import { useProductScanning } from '@/hooks/useProductScanning';
+import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
 
 interface Product {
   product_name: string;
@@ -82,29 +82,19 @@ const Index = () => {
     }
   };
   
-  // Configure barcode router for product lookup
-  useEffect(() => {
-    const handleProductLookup = async (barcode: string) => {
-      setScannedBarcode(barcode);
-      setIsScanning(false); // Pause scanning while looking up the product
-      await lookupProduct(barcode);
-    };
-    
-    // Configure barcode router for product lookup mode when needed
-    if (!isOrganizationScanning) {
-      barcodeRouter.updateConfig({
-        mode: BarcodeHandlingMode.PRODUCT_LOOKUP,
-        onProductLookup: handleProductLookup
-      });
-    }
-    
-    return () => {
-      // Clean up router when component unmounts
-      if (!isOrganizationScanning) {
-        barcodeRouter.reset();
-      }
-    };
-  }, [isOrganizationScanning]);
+  // Handle product scan in normal mode
+  const handleProductScan = async (barcode: string) => {
+    setScannedBarcode(barcode);
+    setIsScanning(false); // Pause scanning while looking up the product
+    await lookupProduct(barcode);
+  };
+  
+  // Use our product scanning hook - only for product lookup mode
+  const { handleBarcodeScan } = useProductScanning({
+    onProductScan: handleProductScan,
+    mode: BarcodeHandlingMode.PRODUCT_LOOKUP,
+    enabled: !isOrganizationScanning && isScanning
+  });
   
   const startScanning = () => {
     setIsScanning(true);
@@ -115,7 +105,6 @@ const Index = () => {
     setProduct(null);
     setError(null);
     setIsScanning(true);
-    barcodeRouter.reset(); // Reset the barcode router state
   };
 
   // Handle history item selection
@@ -126,8 +115,12 @@ const Index = () => {
   };
 
   // Handle barcode detection
-  const handleBarcodeDetected = async (barcode: string) => {
-    await barcodeRouter.handleBarcodeScan(barcode);
+  const onBarcodeDetected = async (barcode: string) => {
+    console.log("Index detected barcode:", barcode);
+    // Only process in normal mode
+    if (!isOrganizationScanning) {
+      await handleBarcodeScan(barcode);
+    }
   };
 
   // Initialize scanning when the component mounts or when organization scanning changes
@@ -160,7 +153,7 @@ const Index = () => {
           {/* Only show scanner in the Index page when not in organization scanning mode */}
           {!isOrganizationScanning && (
             <BarcodeScanner 
-              onBarcodeDetected={handleBarcodeDetected} 
+              onBarcodeDetected={onBarcodeDetected} 
               isScanning={isScanning} 
             />
           )}

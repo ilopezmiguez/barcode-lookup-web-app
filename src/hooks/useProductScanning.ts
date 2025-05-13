@@ -33,12 +33,14 @@ export function useProductScanning({
   const { handleBarcodeScan } = useBarcodeRouter({
     mode,
     onProductLookup: async (barcode: string) => {
+      console.log("Product lookup handler called with barcode:", barcode);
       handleBarcodeScanNotification(barcode);
       if (onProductScan && mode === BarcodeHandlingMode.PRODUCT_LOOKUP) {
         await onProductScan(barcode);
       }
     },
     onShelfOrganization: async (barcode: string) => {
+      console.log("Shelf organization handler called with barcode:", barcode);
       handleBarcodeScanNotification(barcode);
       if (onProductScan && mode === BarcodeHandlingMode.SHELF_ORGANIZATION) {
         await onProductScan(barcode);

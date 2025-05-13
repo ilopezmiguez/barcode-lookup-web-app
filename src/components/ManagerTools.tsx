@@ -1,22 +1,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, PanelLeftClose } from 'lucide-react';
 import { MissingProductsList } from '@/components/MissingProductsList';
 import { ActionButtons } from '@/components/ActionButtons';
 import { useMissingProducts } from '@/hooks/useMissingProducts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShelfOrganizer } from '@/components/ShelfOrganizer';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { Button } from '@/components/ui/button';
+import { useManagerUIState } from '@/hooks/useManagerUIState';
 
 export function ManagerTools() {
-  const [isOpen, setIsOpen] = useState(false);
+  // Use the manager UI state hook
+  const { 
+    isManagerToolsOpen: isOpen, 
+    setIsManagerToolsOpen: setIsOpen,
+    expandManagerTools,
+    collapseManagerTools
+  } = useOrganization();
   
   // Get the organization context
   const { 
     uiState, 
-    expandManagerTools, 
-    collapseManagerTools
+    isOrganizing
   } = useOrganization();
   
   // Pass only the isOpen state to the hook - toast will be obtained inside the hook
@@ -31,21 +38,25 @@ export function ManagerTools() {
     clearMissingProducts 
   } = useMissingProducts(isOpen);
   
-  // Sync the collapsible state with the organization context
-  useEffect(() => {
-    if (isOpen) {
-      expandManagerTools();
-    } else {
-      collapseManagerTools();
-    }
-  }, [isOpen, expandManagerTools, collapseManagerTools]);
-  
   // Auto-expand the manager tools when we need to show the shelf ID input
   useEffect(() => {
     if (uiState === 'awaiting_shelf_id' || uiState === 'shelf_saved_options' || uiState === 'reviewing_shelf') {
       setIsOpen(true);
+    } else if (uiState === 'scanning_active') {
+      // Auto-collapse for scanning_active state (mobile optimization)
+      setIsOpen(false);
     }
-  }, [uiState]);
+  }, [uiState, setIsOpen]);
+
+  // Current active tab
+  const [activeTab, setActiveTab] = useState('missing-products');
+
+  // Set appropriate tab based on organization state
+  useEffect(() => {
+    if (isOrganizing) {
+      setActiveTab('shelf-organization');
+    }
+  }, [isOrganizing]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-md">
@@ -57,8 +68,27 @@ export function ManagerTools() {
           </div>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="p-4 max-h-[80vh] overflow-y-auto">
-          <Tabs defaultValue="missing-products" className="w-full">
+        <CollapsibleContent className="p-4 max-h-[60vh] overflow-y-auto">
+          {/* Floating close button - visible on mobile when scanning */}
+          {uiState === 'scanning_active' && (
+            <div className="md:hidden fixed top-4 right-4 z-50">
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="rounded-full h-10 w-10 p-0 bg-background/80 backdrop-blur-sm"
+                onClick={() => setIsOpen(false)}
+              >
+                <PanelLeftClose size={16} />
+              </Button>
+            </div>
+          )}
+          
+          <Tabs 
+            defaultValue="missing-products" 
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="w-full mb-4">
               <TabsTrigger value="missing-products" className="flex-1">
                 Productos Faltantes
@@ -89,7 +119,7 @@ export function ManagerTools() {
               />
             </TabsContent>
             
-            <TabsContent value="shelf-organization" className="max-h-[60vh] overflow-y-auto">
+            <TabsContent value="shelf-organization" className="max-h-[55vh] overflow-y-auto">
               <ShelfOrganizer />
             </TabsContent>
           </Tabs>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import BarcodeScanner from '@/components/BarcodeScanner';
@@ -29,29 +28,20 @@ export default function ScanningInterface() {
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
 
-  // Use our product scanning hook
+  // Use our product scanning hook - explicitly for organization mode
   const { handleBarcodeScan } = useProductScanning({
     onProductScan: handleProductScan,
     mode: BarcodeHandlingMode.SHELF_ORGANIZATION,
     enabled: !isReviewing && isScanning
   });
 
-  // Toggle between scanning and reviewing modes
-  const toggleView = () => {
-    if (isReviewing) {
-      toggleScanningMode(false); // Switch to scanning mode
-    } else {
-      toggleScanningMode(true); // Switch to reviewing mode
-    }
-  };
-
   // Handle barcode detection from scanner component
   const onBarcodeDetected = async (barcode: string) => {
     console.log("ScanningInterface detected barcode:", barcode);
-    await handleBarcodeScan(barcode);
+    if (!isReviewing && isScanning) {
+      await handleBarcodeScan(barcode);
+    }
   };
-
-  // We don't need useEffect for cleanup anymore as our hook handles that
 
   return (
     <div className="space-y-4 pb-20">

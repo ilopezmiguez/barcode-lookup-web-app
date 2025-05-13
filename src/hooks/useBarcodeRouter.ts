@@ -20,7 +20,11 @@ export function useBarcodeRouter({
   useEffect(() => {
     if (!enabled) return;
     
-    console.log(`Setting barcode router to ${mode} mode`);
+    console.log(`Setting barcode router to ${mode} mode with handlers:`, {
+      hasProductLookupHandler: !!onProductLookup,
+      hasShelfOrganizationHandler: !!onShelfOrganization
+    });
+    
     barcodeRouter.updateConfig({
       mode,
       onProductLookup,
@@ -37,8 +41,9 @@ export function useBarcodeRouter({
   // Expose a method to handle barcode scans directly
   const handleBarcodeScan = useCallback(async (barcode: string) => {
     if (!enabled) return;
+    console.log(`Handling barcode scan via hook: ${barcode} in mode: ${mode}`);
     await barcodeRouter.handleBarcodeScan(barcode);
-  }, [enabled]);
+  }, [enabled, mode]);
 
   return {
     handleBarcodeScan

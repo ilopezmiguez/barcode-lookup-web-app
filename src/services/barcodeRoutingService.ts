@@ -30,6 +30,7 @@ export class BarcodeRoutingService {
 
   constructor(initialConfig: BarcodeRouterConfig) {
     this.config = initialConfig;
+    console.log("BarcodeRoutingService initialized with mode:", initialConfig.mode);
   }
 
   /**
@@ -37,6 +38,11 @@ export class BarcodeRoutingService {
    */
   updateConfig(newConfig: Partial<BarcodeRouterConfig>): void {
     this.config = { ...this.config, ...newConfig };
+    console.log("BarcodeRoutingService configuration updated:", {
+      mode: this.config.mode,
+      hasProductLookupHandler: !!this.config.onProductLookup,
+      hasShelfOrganizationHandler: !!this.config.onShelfOrganization
+    });
   }
 
   /**
@@ -68,6 +74,7 @@ export class BarcodeRoutingService {
     // Set cooldown timeout
     this.scanTimeoutId = window.setTimeout(() => {
       this.lastScannedBarcode = null;
+      console.log("Barcode cooldown reset, ready for new scan");
     }, this.scanCooldownMs);
     
     try {
@@ -75,17 +82,29 @@ export class BarcodeRoutingService {
       switch (this.config.mode) {
         case BarcodeHandlingMode.PRODUCT_LOOKUP:
           if (this.config.onProductLookup) {
+            console.log("Calling product lookup handler");
             await this.config.onProductLookup(barcode);
           } else {
             console.error("No product lookup handler configured");
+            toast({
+              title: "Error de configuración",
+              description: "No hay un manejador configurado para búsqueda de productos",
+              variant: "destructive"
+            });
           }
           break;
         
         case BarcodeHandlingMode.SHELF_ORGANIZATION:
           if (this.config.onShelfOrganization) {
+            console.log("Calling shelf organization handler");
             await this.config.onShelfOrganization(barcode);
           } else {
             console.error("No shelf organization handler configured");
+            toast({
+              title: "Error de configuración",
+              description: "No hay un manejador configurado para organización de estantes",
+              variant: "destructive"
+            });
           }
           break;
           
@@ -106,6 +125,7 @@ export class BarcodeRoutingService {
    * Reset the service state
    */
   reset(): void {
+    console.log("Resetting barcode router state");
     this.lastScannedBarcode = null;
     if (this.scanTimeoutId !== null) {
       window.clearTimeout(this.scanTimeoutId);

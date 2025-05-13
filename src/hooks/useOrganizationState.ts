@@ -2,6 +2,7 @@
 import { useOrganizationCore } from '@/hooks/useOrganizationCore';
 import { useOrganizationOperations } from '@/hooks/useOrganizationOperations';
 import { useOrganizationUI } from '@/hooks/useOrganizationUI';
+import { useManagerUIState } from '@/hooks/useManagerUIState';
 
 /**
  * Main hook that combines organization core state, operations, and UI management
@@ -28,6 +29,9 @@ export function useOrganizationState() {
     core.resetOrganizationEvent,
     core.setCurrentShelfId
   );
+  
+  // Set up manager UI state
+  const managerUI = useManagerUIState(core.uiState);
 
   return {
     // State
@@ -37,6 +41,7 @@ export function useOrganizationState() {
     scannedProducts: core.scannedProducts,
     uiState: core.uiState,
     isLoading: operations.isLoading,
+    isManagerToolsOpen: managerUI.isManagerToolsOpen,
     
     // Actions
     startOrganizationEvent: core.startOrganizationEvent,
@@ -46,6 +51,9 @@ export function useOrganizationState() {
     startNewShelf: ui.startNewShelf,
     cancelCurrentShelf: ui.cancelCurrentShelf,
     endOrganizationEvent: ui.endOrganizationEvent,
-    toggleScanningMode: ui.toggleScanningMode
+    toggleScanningMode: ui.toggleScanningMode,
+    setIsManagerToolsOpen: managerUI.setIsManagerToolsOpen,
+    expandManagerTools: managerUI.expandManagerTools,
+    collapseManagerTools: managerUI.collapseManagerTools
   };
 }
