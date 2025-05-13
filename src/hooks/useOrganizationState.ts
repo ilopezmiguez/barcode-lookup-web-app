@@ -1,20 +1,10 @@
+
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import { lookupProductName, saveShelfProducts } from '@/services/organizationService';
+import { ScannedProduct, OrganizerUIState } from '@/types/organization';
 
-export interface ScannedProduct {
-  barcode: string;
-  timestamp: Date;
-  productName?: string | null;
-}
-
-export type OrganizerUIState = 
-  | 'idle'
-  | 'awaiting_shelf_id'
-  | 'scanning_shelf'
-  | 'shelf_saved_options';
-
-export function useShelfOrganizer() {
+export function useOrganizationState() {
   // Main event state
   const [isOrganizing, setIsOrganizing] = useState<boolean>(false);
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
@@ -23,8 +13,6 @@ export function useShelfOrganizer() {
   const [uiState, setUiState] = useState<OrganizerUIState>('idle');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  const { toast } = useToast();
-
   // Start a new organization event
   const startOrganizationEvent = useCallback(() => {
     // Generate a random 8-digit event ID
@@ -39,7 +27,7 @@ export function useShelfOrganizer() {
       title: "Evento de organización iniciado",
       description: `ID del evento: ${eventId}`
     });
-  }, [toast]);
+  }, []);
 
   // Begin scanning for a specific shelf
   const startShelfScan = useCallback((shelfId: string) => {
@@ -52,85 +40,71 @@ export function useShelfOrganizer() {
       return;
     }
     
-    console.log("Setting current shelf ID to:", shelfId); // Added logging
+    console.log("Setting current shelf ID to:", shelfId);
     setCurrentShelfId(shelfId);
     setScannedProducts([]);
-    setUiState('scanning_shelf');
+    setUiState('scanning_active');
     
     toast({
       title: "Escaneo iniciado",
       description: `Escaneando productos para el estante: ${shelfId}`
     });
-  }, [toast]);
+  }, []);
 
   // Handle a barcode scan
   const handleProductScan = useCallback(async (barcode: string) => {
-    if (!isOrganizing || uiState !== 'scanning_shelf') {
+    console.log(`useOrganizationState: handleProductScan called with barcode ${barcode}`);
+    console.log(`Current state: isOrganizing=${isOrganizing}, uiState=${uiState}, currentShelfId=${currentShelfId}`);
+    
+    if (!isOrganizing) {
+      console.log("Not organizing, ignoring barcode");
+      return;
+    }
+    
+    if (uiState !== 'scanning_active' && uiState !== 'reviewing_shelf') {
+      console.log("Not in scanning_active or reviewing_shelf state, ignoring barcode");
       return;
     }
 
-    console.log(`Scanning product: ${barcode} for shelf: ${currentShelfId}`);
+    console.log(`Adding product: ${barcode} for shelf: ${currentShelfId}`);
     
-    setScannedProducts(prev => {
-      // Check if this barcode has already been scanned
-      const isDuplicate = prev.some(product => product.barcode === barcode);
-      
-      if (isDuplicate) {
-        toast({
-          title: "Producto ya escaneado",
-          description: `El código ${barcode} ya ha sido escaneado`,
-          variant: "default"
-        });
-        return prev;
-      }
-      
-      // Try to find the product name in the database
-      lookupProductName(barcode).then(productName => {
-        if (productName) {
-          // Update the product with its name if found
-          setScannedProducts(current => 
-            current.map(p => 
-              p.barcode === barcode 
-                ? { ...p, productName } 
-                : p
-            )
-          );
-        }
-      });
-      
-      // Add the new product (we'll update with product name asynchronously)
-      const newProducts = [...prev, { 
-        barcode, 
-        timestamp: new Date(),
-        productName: null // Will be updated when lookup completes
-      }];
-      
-      // Provide feedback through toast
+    // Check if this barcode has already been scanned
+    const isDuplicate = scannedProducts.some(product => product.barcode === barcode);
+    
+    if (isDuplicate) {
+      console.log("Duplicate barcode, not adding to list");
       toast({
-        title: "Producto escaneado",
-        description: `Código: ${barcode}`,
-        duration: 1500
+        title: "Producto ya escaneado",
+        description: `El código ${barcode} ya ha sido escaneado`,
+        variant: "default"
       });
-      
-      return newProducts;
-    });
-  }, [isOrganizing, uiState, currentShelfId, toast]);
-
-  // Helper function to look up product names
-  const lookupProductName = async (barcode: string): Promise<string | null> => {
-    try {
-      const { data } = await supabase
-        .from('products')
-        .select('product_name')
-        .eq('barcode_number', barcode)
-        .single();
-      
-      return data?.product_name || null;
-    } catch (error) {
-      console.log('Product lookup error:', error);
-      return null;
+      return;
     }
-  };
+    
+    // Add the new product (we'll update with product name asynchronously)
+    const newProduct = {
+      barcode,
+      timestamp: new Date(),
+      productName: null // Will be updated when lookup completes
+    };
+    
+    console.log("Adding new product to scannedProducts:", newProduct);
+    setScannedProducts(prev => [...prev, newProduct]);
+    
+    // Try to find the product name in the database
+    const productName = await lookupProductName(barcode);
+    if (productName) {
+      console.log(`Found product name: ${productName} for barcode: ${barcode}`);
+      // Update the product with its name if found
+      setScannedProducts(current => 
+        current.map(p => 
+          p.barcode === barcode 
+            ? { ...p, productName } 
+            : p
+        )
+      );
+    }
+  }, [isOrganizing, uiState, currentShelfId, scannedProducts]);
 
   // Save the current shelf to Supabase
   const saveShelf = useCallback(async () => {
@@ -146,22 +120,10 @@ export function useShelfOrganizer() {
     setIsLoading(true);
     
     try {
-      // Prepare data for bulk insert
-      const productsToInsert = scannedProducts.map(product => ({
-        shelf: currentShelfId,
-        barcode_number: product.barcode,
-        event_id: currentEventId
-      }));
+      const result = await saveShelfProducts(currentEventId, currentShelfId, scannedProducts);
       
-      console.log("Saving shelf with products:", productsToInsert);
-      
-      // Bulk insert into org_products table
-      const { error } = await supabase
-        .from('org_products')
-        .insert(productsToInsert);
-      
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw result.error;
       }
       
       toast({
@@ -182,7 +144,7 @@ export function useShelfOrganizer() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentEventId, currentShelfId, scannedProducts, toast]);
+  }, [currentEventId, currentShelfId, scannedProducts]);
 
   // Start a new shelf after saving the previous one
   const startNewShelf = useCallback(() => {
@@ -207,7 +169,7 @@ export function useShelfOrganizer() {
       title: "Estante cancelado",
       description: "Se han descartado todos los productos escaneados"
     });
-  }, [scannedProducts.length, toast]);
+  }, [scannedProducts.length]);
 
   // End the entire organization event
   const endOrganizationEvent = useCallback(() => {
@@ -227,7 +189,7 @@ export function useShelfOrganizer() {
       title: "Evento de organización finalizado",
       description: "Todos los datos han sido guardados"
     });
-  }, [scannedProducts.length, toast]);
+  }, [scannedProducts.length]);
 
   return {
     // State

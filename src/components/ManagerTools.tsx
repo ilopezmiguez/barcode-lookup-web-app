@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { MissingProductsList } from '@/components/MissingProductsList';
@@ -43,7 +42,7 @@ export function ManagerTools() {
   
   // Auto-expand the manager tools when we need to show the shelf ID input
   useEffect(() => {
-    if (uiState === 'awaiting_shelf_id' || uiState === 'shelf_saved_options') {
+    if (uiState === 'awaiting_shelf_id' || uiState === 'shelf_saved_options' || uiState === 'reviewing_shelf') {
       setIsOpen(true);
     }
   }, [uiState]);
