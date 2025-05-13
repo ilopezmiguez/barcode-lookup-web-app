@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import BarcodeScanner from '@/components/BarcodeScanner';
@@ -27,6 +28,11 @@ export default function ScanningInterface() {
   // Determine if we're in active scanning or reviewing mode
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
+
+  // Define the missing toggleView function
+  const toggleView = () => {
+    toggleScanningMode(!isReviewing);
+  };
 
   // Use our product scanning hook - explicitly for organization mode
   const { handleBarcodeScan } = useProductScanning({

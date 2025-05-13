@@ -28,6 +28,7 @@ interface OrganizationContextType {
   
   // Manager tools UI state
   isManagerToolsOpen: boolean;
+  setIsManagerToolsOpen: (isOpen: boolean) => void;  // Added the missing property
   collapseManagerTools: () => void;
   expandManagerTools: () => void;
 }
@@ -69,6 +70,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const contextValue: OrganizationContextType = {
     ...organizationState,
     isManagerToolsOpen: managerUIState.isManagerToolsOpen,
+    setIsManagerToolsOpen: managerUIState.setIsManagerToolsOpen, // Added the missing property
     collapseManagerTools: managerUIState.collapseManagerTools,
     expandManagerTools,
   };
