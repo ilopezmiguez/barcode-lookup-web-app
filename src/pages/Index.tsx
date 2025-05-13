@@ -4,25 +4,42 @@ import { supabase } from '@/integrations/supabase/client';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import ProductDisplay from '@/components/ProductDisplay';
 import { Barcode } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import ManagerTools from '@/components/ManagerTools';
+import { useOrganization } from '@/contexts/OrganizationContext';
+
 interface Product {
   product_name: string;
   price: number;
   barcode_number: string;
   category?: string | null;
 }
+
 const Index = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const {
-    toast
-  } = useToast();
+  
+  const { toast } = useToast();
+  
+  // Get the organization context
+  const { isOrganizing, uiState, handleProductScan } = useOrganization();
+  
+  // When the user is in organization mode and scanning is active, we need to handle it differently
+  const isOrganizationScanning = isOrganizing && uiState === 'scanning_active';
+  
+  // Combined barcode handling function that routes to either product lookup or organization
   const handleBarcodeDetected = async (barcode: string) => {
+    // If we're in organization mode and scanning is active, send to organization
+    if (isOrganizationScanning) {
+      await handleProductScan(barcode);
+      return;
+    }
+    
+    // Otherwise, proceed with normal product lookup flow
     // Only process if it's a new barcode or first scan
     if (barcode !== scannedBarcode) {
       setScannedBarcode(barcode);
@@ -30,6 +47,7 @@ const Index = () => {
       await lookupProduct(barcode);
     }
   };
+  
   const lookupProduct = async (barcode: string) => {
     setIsLoading(true);
     setError(null);
@@ -76,9 +94,11 @@ const Index = () => {
       setIsLoading(false);
     }
   };
+  
   const startScanning = () => {
     setIsScanning(true);
   };
+  
   const resetScanner = () => {
     setScannedBarcode(null);
     setProduct(null);
@@ -93,13 +113,19 @@ const Index = () => {
     // No need to fetch from the database again as we already have the product data
   };
 
-  // Initialize scanning when the component mounts
+  // Initialize scanning when the component mounts or when organization scanning changes
   useEffect(() => {
-    if (!isScanning && !scannedBarcode) {
+    if (isOrganizationScanning) {
+      // In organization mode, make sure scanning is active
+      setIsScanning(true);
+    } else if (!isScanning && !scannedBarcode) {
+      // In normal mode, follow the regular rules
       startScanning();
     }
-  }, []);
-  return <div className="min-h-screen bg-background px-4 py-8 pb-16">
+  }, [isOrganizationScanning]);
+
+  return (
+    <div className="min-h-screen bg-background px-4 py-8 pb-16">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -115,36 +141,54 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Scanner */}
+        {/* Scanner - Only display in organization mode or normal scanning mode */}
         <div className="mb-6">
-          <BarcodeScanner onBarcodeDetected={handleBarcodeDetected} isScanning={isScanning} />
+          <BarcodeScanner 
+            onBarcodeDetected={handleBarcodeDetected} 
+            isScanning={isScanning} 
+          />
         </div>
         
-        {/* Product Information */}
-        <div className="mb-6">
-          <ProductDisplay product={product} isLoading={isLoading} error={error} scannedBarcode={scannedBarcode} onHistoryItemClick={handleHistoryItemClick} />
-        </div>
+        {/* Product Information - Hide during organization scanning */}
+        {!isOrganizationScanning && (
+          <div className="mb-6">
+            <ProductDisplay 
+              product={product} 
+              isLoading={isLoading} 
+              error={error} 
+              scannedBarcode={scannedBarcode}
+              onHistoryItemClick={handleHistoryItemClick} 
+            />
+          </div>
+        )}
         
-        {/* Controls */}
-        <div className="mt-6 flex justify-center space-x-4">
-          {!isScanning && <Button onClick={startScanning} disabled={isLoading}>
-              Continuar Escaneando
-            </Button>}
-          
-          {scannedBarcode && <Button onClick={resetScanner} variant="outline" disabled={isLoading}>
-              Escanear Nuevo Código
-            </Button>}
-        </div>
+        {/* Controls - Hide during organization scanning */}
+        {!isOrganizationScanning && (
+          <div className="mt-6 flex justify-center space-x-4">
+            {!isScanning && (
+              <Button onClick={startScanning} disabled={isLoading}>
+                Continuar Escaneando
+              </Button>
+            )}
+            
+            {scannedBarcode && (
+              <Button onClick={resetScanner} variant="outline" disabled={isLoading}>
+                Escanear Nuevo Código
+              </Button>
+            )}
+          </div>
+        )}
         
         {/* Development info */}
         <div className="mt-12 text-center text-xs text-muted-foreground">
-          
           
         </div>
       </div>
       
       {/* Manager Tools */}
       <ManagerTools />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

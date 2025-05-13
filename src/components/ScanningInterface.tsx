@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BarcodeScanner from '@/components/BarcodeScanner';
-import { useShelfOrganizer } from '@/hooks/useShelfOrganizer';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import { Save, X, CircleCheck, PackageSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,39 +16,48 @@ export default function ScanningInterface() {
     handleProductScan, 
     saveShelf, 
     cancelCurrentShelf,
-    isLoading 
-  } = useShelfOrganizer();
+    isLoading,
+    uiState
+  } = useOrganization();
   
   const [isScanning, setIsScanning] = useState(true);
+  
+  // Determine if we're in active scanning or reviewing mode
+  const isReviewing = uiState === 'reviewing_shelf';
+  const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between bg-primary/10 p-3 rounded-md">
         <span className="font-medium">
-          Estante: <span className="font-bold text-primary">{currentShelfId}</span>
+          {scanningTitle} <span className="font-bold text-primary">{currentShelfId}</span>
         </span>
         <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
           {scannedProducts.length} productos
         </span>
       </div>
       
-      {/* Scanner */}
-      <div className="mb-4">
-        <BarcodeScanner 
-          onBarcodeDetected={handleProductScan} 
-          isScanning={isScanning} 
-        />
-      </div>
+      {/* Scanner - Only show when actively scanning */}
+      {!isReviewing && (
+        <div className="mb-4">
+          <BarcodeScanner 
+            onBarcodeDetected={handleProductScan} 
+            isScanning={isScanning} 
+          />
+        </div>
+      )}
       
-      {/* Scanner Controls */}
-      <div className="flex justify-center gap-2 mb-2">
-        <Button 
-          variant="outline" 
-          onClick={() => setIsScanning(!isScanning)}
-        >
-          {isScanning ? 'Pausar Escáner' : 'Reanudar Escáner'}
-        </Button>
-      </div>
+      {/* Scanner Controls - Only show when actively scanning */}
+      {!isReviewing && (
+        <div className="flex justify-center gap-2 mb-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsScanning(!isScanning)}
+          >
+            {isScanning ? 'Pausar Escáner' : 'Reanudar Escáner'}
+          </Button>
+        </div>
+      )}
       
       {/* Scanned Items List */}
       <Card className="mb-4">

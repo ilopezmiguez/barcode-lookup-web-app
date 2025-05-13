@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScanBarcode } from 'lucide-react';
-import { useShelfOrganizer } from '@/hooks/useShelfOrganizer';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function ShelfForm() {
-  const { startShelfScan } = useShelfOrganizer();
+  const { startShelfScan } = useOrganization();
   const [shelfId, setShelfId] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {

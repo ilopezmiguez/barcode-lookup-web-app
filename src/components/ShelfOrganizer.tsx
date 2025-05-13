@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader, Box, PackageCheck } from 'lucide-react';
-import { useShelfOrganizer } from '@/hooks/useShelfOrganizer';
+import { Loader, PackageCheck } from 'lucide-react';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import ShelfForm from '@/components/ShelfForm';
 import ScanningInterface from '@/components/ScanningInterface';
 import SavedShelfOptions from '@/components/SavedShelfOptions';
@@ -15,7 +15,7 @@ export function ShelfOrganizer() {
     uiState,
     isLoading,
     startOrganizationEvent
-  } = useShelfOrganizer();
+  } = useOrganization();
 
   // If not organizing, show the start button
   if (!isOrganizing) {
@@ -56,7 +56,7 @@ export function ShelfOrganizer() {
       )}
 
       {uiState === 'awaiting_shelf_id' && <ShelfForm />}
-      {uiState === 'scanning_shelf' && <ScanningInterface />}
+      {(uiState === 'scanning_active' || uiState === 'reviewing_shelf') && <ScanningInterface />}
       {uiState === 'shelf_saved_options' && <SavedShelfOptions />}
     </div>
   );
