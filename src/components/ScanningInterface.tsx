@@ -5,7 +5,7 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import { useShelfOrganizer } from '@/hooks/useShelfOrganizer';
 import { Save, X, CircleCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
