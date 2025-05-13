@@ -58,6 +58,8 @@ export function useOrganizationOperations(
         // Update the product with its name if found
         // We need to update based on timestamp to handle multiple products with same barcode
         updateScannedProduct(barcode, { productName });
+      } else {
+        console.log(`No product found for barcode: ${barcode}`);
       }
     } catch (error) {
       console.error("Error looking up product name:", error);
@@ -66,7 +68,16 @@ export function useOrganizationOperations(
 
   // Save the current shelf to Supabase
   const saveShelf = useCallback(async () => {
-    if (!currentEventId || !currentShelfId || scannedProducts.length === 0) {
+    if (!currentEventId || !currentShelfId) {
+      toast({
+        title: "Error al guardar",
+        description: "Falta el ID del evento o del estante",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (scannedProducts.length === 0) {
       toast({
         title: "Error al guardar",
         description: "No hay productos escaneados para guardar",
@@ -97,7 +108,8 @@ export function useOrganizationOperations(
       
       toast({
         title: "Estante guardado exitosamente",
-        description: `Estante '${currentShelfId}' guardado con ${scannedProducts.length} productos.`
+        description: `Estante '${currentShelfId}' guardado con ${scannedProducts.length} productos.`,
+        duration: 5000
       });
       
       // Change UI state to show options after saving

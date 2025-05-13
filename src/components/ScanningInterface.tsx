@@ -8,8 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { toast } from '@/hooks/use-toast';
-import { barcodeRouter } from '@/services/barcodeRoutingService';
+import { useProductScanning } from '@/hooks/useProductScanning';
+import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
 
 export default function ScanningInterface() {
   const { 
@@ -19,7 +19,8 @@ export default function ScanningInterface() {
     cancelCurrentShelf,
     isLoading,
     uiState,
-    toggleScanningMode
+    toggleScanningMode,
+    handleProductScan
   } = useOrganization();
   
   const [isScanning, setIsScanning] = useState(true);
@@ -27,6 +28,13 @@ export default function ScanningInterface() {
   // Determine if we're in active scanning or reviewing mode
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
+
+  // Use our product scanning hook
+  const { handleBarcodeScan } = useProductScanning({
+    onProductScan: handleProductScan,
+    mode: BarcodeHandlingMode.SHELF_ORGANIZATION,
+    enabled: !isReviewing && isScanning
+  });
 
   // Toggle between scanning and reviewing modes
   const toggleView = () => {
@@ -37,27 +45,13 @@ export default function ScanningInterface() {
     }
   };
 
+  // Handle barcode detection from scanner component
   const onBarcodeDetected = async (barcode: string) => {
     console.log("ScanningInterface detected barcode:", barcode);
-    
-    // We now use the centralized barcode router
-    // The router will handle routing to the appropriate handler
-    await barcodeRouter.handleBarcodeScan(barcode);
-    
-    // Provide immediate feedback with toast
-    toast({
-      title: "Producto escaneado",
-      description: `Código: ${barcode}`,
-      duration: 1500
-    });
+    await handleBarcodeScan(barcode);
   };
 
-  // Clean up barcode router on unmount
-  useEffect(() => {
-    return () => {
-      barcodeRouter.reset();
-    };
-  }, []);
+  // We don't need useEffect for cleanup anymore as our hook handles that
 
   return (
     <div className="space-y-4 pb-20">
@@ -125,7 +119,7 @@ export default function ScanningInterface() {
             <ScrollArea className={isReviewing ? "h-96" : "h-52"}>
               <div className="space-y-1">
                 {scannedProducts.map((product, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                  <div key={`${product.barcode}-${product.timestamp.getTime()}`} className="flex items-center justify-between bg-muted/50 p-2 rounded">
                     <div className="flex items-center gap-2 overflow-hidden">
                       <CircleCheck size={16} className="text-green-500 shrink-0" />
                       <div className="min-w-0 flex-1">

@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import { ScannedProduct, OrganizerUIState } from '@/types/organization';
 import { toast } from '@/hooks/use-toast';
+import { transition, stateDescriptions } from '@/lib/organizationStateMachine';
 
 /**
  * Core organization state and simple actions
@@ -20,7 +21,7 @@ export function useOrganizationCore() {
     const eventId = Math.floor(10000000 + Math.random() * 90000000).toString();
     setCurrentEventId(eventId);
     setIsOrganizing(true);
-    setUiState('awaiting_shelf_id');
+    changeUiState('awaiting_shelf_id');
     setCurrentShelfId('');
     setScannedProducts([]);
     
@@ -44,7 +45,7 @@ export function useOrganizationCore() {
     console.log("Setting current shelf ID to:", shelfId);
     setCurrentShelfId(shelfId);
     setScannedProducts([]);
-    setUiState('scanning_active');
+    changeUiState('scanning_active');
     
     toast({
       title: "Escaneo iniciado",
@@ -86,10 +87,10 @@ export function useOrganizationCore() {
     return scannedProducts.some(product => product.barcode === barcode);
   }, [scannedProducts]);
 
-  // Change the UI state
+  // Change the UI state using the state machine
   const changeUiState = useCallback((newState: OrganizerUIState) => {
-    console.log(`Changing UI state from ${uiState} to ${newState}`);
-    setUiState(newState);
+    console.log(`Attempting UI state transition: ${uiState} → ${newState} (${stateDescriptions[newState]})`);
+    setUiState(currentState => transition(currentState, newState));
   }, [uiState]);
 
   // Reset the organization event
@@ -98,8 +99,8 @@ export function useOrganizationCore() {
     setCurrentEventId(null);
     setCurrentShelfId('');
     setScannedProducts([]);
-    setUiState('idle');
-  }, []);
+    changeUiState('idle');
+  }, [changeUiState]);
 
   return {
     // State

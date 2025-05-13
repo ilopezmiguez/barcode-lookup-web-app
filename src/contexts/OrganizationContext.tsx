@@ -3,7 +3,8 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useOrganizationState } from '@/hooks/useOrganizationState';
 import { useManagerUIState } from '@/hooks/useManagerUIState';
 import { ScannedProduct, OrganizerUIState } from '@/types/organization';
-import { BarcodeHandlingMode, barcodeRouter } from '@/services/barcodeRoutingService';
+import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
+import { useBarcodeRouter } from '@/hooks/useBarcodeRouter';
 
 // Define the shape of our context
 interface OrganizationContextType {
@@ -54,27 +55,15 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   }, [managerUIState, organizationState.uiState, organizationState.toggleScanningMode]);
 
-  // Configure barcode router based on organization state
-  React.useEffect(() => {
-    // Update barcode router configuration when organization state changes
-    if (organizationState.isOrganizing && 
-        (organizationState.uiState === 'scanning_active' || organizationState.uiState === 'reviewing_shelf')) {
-      console.log("Setting barcode router to SHELF_ORGANIZATION mode");
-      barcodeRouter.updateConfig({
-        mode: BarcodeHandlingMode.SHELF_ORGANIZATION,
-        onShelfOrganization: organizationState.handleProductScan
-      });
-    } else {
-      console.log("Setting barcode router to PRODUCT_LOOKUP mode");
-      barcodeRouter.updateConfig({
-        mode: BarcodeHandlingMode.PRODUCT_LOOKUP
-      });
-    }
-  }, [
-    organizationState.isOrganizing, 
-    organizationState.uiState,
-    organizationState.handleProductScan
-  ]);
+  // Configure barcode router using our new hook
+  useBarcodeRouter({
+    mode: organizationState.isOrganizing && 
+         (organizationState.uiState === 'scanning_active' || organizationState.uiState === 'reviewing_shelf')
+         ? BarcodeHandlingMode.SHELF_ORGANIZATION
+         : BarcodeHandlingMode.PRODUCT_LOOKUP,
+    onShelfOrganization: organizationState.handleProductScan,
+    enabled: true
+  });
 
   // Prepare the context value by combining our hooks
   const contextValue: OrganizationContextType = {
