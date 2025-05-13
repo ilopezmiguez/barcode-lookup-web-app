@@ -3,6 +3,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useOrganizationState } from '@/hooks/useOrganizationState';
 import { useManagerUIState } from '@/hooks/useManagerUIState';
 import { ScannedProduct, OrganizerUIState } from '@/types/organization';
+import { BarcodeHandlingMode, barcodeRouter } from '@/services/barcodeRoutingService';
 
 // Define the shape of our context
 interface OrganizationContextType {
@@ -22,8 +23,10 @@ interface OrganizationContextType {
   startNewShelf: () => void;
   cancelCurrentShelf: () => void;
   endOrganizationEvent: () => void;
+  toggleScanningMode: (isReviewing: boolean) => void;
   
   // Manager tools UI state
+  isManagerToolsOpen: boolean;
   collapseManagerTools: () => void;
   expandManagerTools: () => void;
 }
@@ -39,8 +42,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Use the manager UI state hook
   const managerUIState = useManagerUIState(organizationState.uiState);
   
-  // Handle transition from scanning_active to reviewing_shelf
-  // when manager tools are expanded
+  // Handle transition from scanning_active to reviewing_shelf when manager tools are expanded
   const expandManagerTools = React.useCallback(() => {
     managerUIState.expandManagerTools();
     
@@ -48,14 +50,36 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     // transition to reviewing_shelf state
     if (organizationState.uiState === 'scanning_active') {
       console.log("Transitioning from scanning_active to reviewing_shelf");
-      // We need to manually trigger this transition as it's a UI-driven state change
-      organizationState.uiState = 'reviewing_shelf';
+      organizationState.toggleScanningMode(true);
     }
-  }, [managerUIState, organizationState]);
+  }, [managerUIState, organizationState.uiState, organizationState.toggleScanningMode]);
+
+  // Configure barcode router based on organization state
+  React.useEffect(() => {
+    // Update barcode router configuration when organization state changes
+    if (organizationState.isOrganizing && 
+        (organizationState.uiState === 'scanning_active' || organizationState.uiState === 'reviewing_shelf')) {
+      console.log("Setting barcode router to SHELF_ORGANIZATION mode");
+      barcodeRouter.updateConfig({
+        mode: BarcodeHandlingMode.SHELF_ORGANIZATION,
+        onShelfOrganization: organizationState.handleProductScan
+      });
+    } else {
+      console.log("Setting barcode router to PRODUCT_LOOKUP mode");
+      barcodeRouter.updateConfig({
+        mode: BarcodeHandlingMode.PRODUCT_LOOKUP
+      });
+    }
+  }, [
+    organizationState.isOrganizing, 
+    organizationState.uiState,
+    organizationState.handleProductScan
+  ]);
 
   // Prepare the context value by combining our hooks
   const contextValue: OrganizationContextType = {
     ...organizationState,
+    isManagerToolsOpen: managerUIState.isManagerToolsOpen,
     collapseManagerTools: managerUIState.collapseManagerTools,
     expandManagerTools,
   };

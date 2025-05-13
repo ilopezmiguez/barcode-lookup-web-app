@@ -1,24 +1,26 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import { useOrganization } from '@/contexts/OrganizationContext';
-import { Save, X, CircleCheck, PackageSearch } from 'lucide-react';
+import { Save, X, CircleCheck, PackageSearch, Expand, Minimize } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
+import { barcodeRouter } from '@/services/barcodeRoutingService';
 
 export default function ScanningInterface() {
   const { 
     currentShelfId, 
     scannedProducts, 
-    handleProductScan, 
     saveShelf, 
     cancelCurrentShelf,
     isLoading,
-    uiState
+    uiState,
+    expandManagerTools,
+    toggleScanningMode
   } = useOrganization();
   
   const [isScanning, setIsScanning] = useState(true);
@@ -26,34 +28,37 @@ export default function ScanningInterface() {
   // Determine if we're in active scanning or reviewing mode
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
+  
+  // Toggle between scanning and reviewing modes
+  const toggleView = () => {
+    if (isReviewing) {
+      toggleScanningMode(false); // Switch to scanning mode
+    } else {
+      expandManagerTools(); // This will trigger transition to reviewing mode
+    }
+  };
 
   const onBarcodeDetected = async (barcode: string) => {
     console.log("ScanningInterface detected barcode:", barcode);
-    // Make sure we don't process empty barcodes
-    if (!barcode || barcode.trim() === '') {
-      console.log("Empty barcode detected, ignoring");
-      return;
-    }
     
-    try {
-      await handleProductScan(barcode);
-      
-      // Provide immediate feedback with toast
-      toast({
-        title: "Producto escaneado",
-        description: `Código: ${barcode}`,
-        duration: 1500
-      });
-    } catch (error) {
-      console.error("Error handling product scan:", error);
-      toast({
-        title: "Error al escanear",
-        description: "No se pudo procesar el código de barras",
-        variant: "destructive",
-        duration: 3000
-      });
-    }
+    // We now use the centralized barcode router
+    // The router will handle routing to the appropriate handler
+    await barcodeRouter.handleBarcodeScan(barcode);
+    
+    // Provide immediate feedback with toast
+    toast({
+      title: "Producto escaneado",
+      description: `Código: ${barcode}`,
+      duration: 1500
+    });
   };
+
+  // Clean up barcode router on unmount
+  useEffect(() => {
+    return () => {
+      barcodeRouter.reset();
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -91,13 +96,34 @@ export default function ScanningInterface() {
       {/* Scanned Items List */}
       <Card className="mb-4">
         <CardContent className="p-3">
-          <h3 className="font-medium mb-2">Productos escaneados ({scannedProducts.length})</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-medium">Productos escaneados ({scannedProducts.length})</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleView}
+              className="h-8 px-2"
+            >
+              {isReviewing ? (
+                <>
+                  <Minimize size={16} className="mr-1" />
+                  Volver al Escaneo
+                </>
+              ) : (
+                <>
+                  <Expand size={16} className="mr-1" />
+                  Expandir Lista
+                </>
+              )}
+            </Button>
+          </div>
+          
           {scannedProducts.length === 0 ? (
             <p className="text-muted-foreground text-center py-2">
               No hay productos escaneados aún
             </p>
           ) : (
-            <ScrollArea className="h-52">
+            <ScrollArea className={isReviewing ? "h-96" : "h-52"}>
               <div className="space-y-1">
                 {scannedProducts.map((product, idx) => (
                   <div key={idx} className="flex items-center justify-between bg-muted/50 p-2 rounded">

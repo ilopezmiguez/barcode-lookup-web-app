@@ -22,6 +22,7 @@ export function useManagerUIState(uiState: OrganizerUIState) {
     if (uiState === 'awaiting_shelf_id' || uiState === 'shelf_saved_options' || uiState === 'reviewing_shelf') {
       expandManagerTools();
     } else if (uiState === 'scanning_active') {
+      // Only auto-collapse for scanning_active state
       collapseManagerTools();
     }
   }, [uiState, expandManagerTools, collapseManagerTools]);

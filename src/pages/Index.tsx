@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import ManagerTools from '@/components/ManagerTools';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { barcodeRouter, BarcodeHandlingMode } from '@/services/barcodeRoutingService';
 
 interface Product {
   product_name: string;
@@ -27,41 +28,12 @@ const Index = () => {
   const { toast } = useToast();
   
   // Get the organization context
-  const { isOrganizing, uiState, handleProductScan } = useOrganization();
+  const { isOrganizing, uiState } = useOrganization();
   
   // When the user is in organization mode and scanning is active, we need to handle it differently
   const isOrganizationScanning = isOrganizing && (uiState === 'scanning_active');
   
-  // Combined barcode handling function that routes to either product lookup or organization
-  const handleBarcodeDetected = async (barcode: string) => {
-    console.log("Main index detected barcode:", barcode, "isOrganizationScanning:", isOrganizationScanning);
-    
-    if (!barcode || barcode.trim() === '') {
-      console.log("Empty barcode detected, ignoring");
-      return;
-    }
-    
-    // If we're in organization mode and scanning is active, send to organization
-    if (isOrganizationScanning) {
-      console.log("Routing barcode to organization context");
-      try {
-        await handleProductScan(barcode);
-        return;
-      } catch (error) {
-        console.error("Error handling product scan in organization mode:", error);
-      }
-    }
-    
-    // Otherwise, proceed with normal product lookup flow
-    // Only process if it's a new barcode or first scan
-    if (barcode !== scannedBarcode) {
-      console.log("Routing barcode to product lookup");
-      setScannedBarcode(barcode);
-      setIsScanning(false); // Pause scanning while looking up the product
-      await lookupProduct(barcode);
-    }
-  };
-  
+  // Define product lookup function
   const lookupProduct = async (barcode: string) => {
     setIsLoading(true);
     setError(null);
@@ -70,7 +42,8 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase.from('products').select('product_name, price, barcode_number, category').eq('barcode_number', barcode).single();
+      } = await supabase.from('products').select('product_name, price, barcode_number, category').eq('barcode_number', barcode).maybeSingle();
+      
       if (error) {
         console.error('Supabase query error:', error);
 
@@ -109,6 +82,30 @@ const Index = () => {
     }
   };
   
+  // Configure barcode router for product lookup
+  useEffect(() => {
+    const handleProductLookup = async (barcode: string) => {
+      setScannedBarcode(barcode);
+      setIsScanning(false); // Pause scanning while looking up the product
+      await lookupProduct(barcode);
+    };
+    
+    // Configure barcode router for product lookup mode when needed
+    if (!isOrganizationScanning) {
+      barcodeRouter.updateConfig({
+        mode: BarcodeHandlingMode.PRODUCT_LOOKUP,
+        onProductLookup: handleProductLookup
+      });
+    }
+    
+    return () => {
+      // Clean up router when component unmounts
+      if (!isOrganizationScanning) {
+        barcodeRouter.reset();
+      }
+    };
+  }, [isOrganizationScanning]);
+  
   const startScanning = () => {
     setIsScanning(true);
   };
@@ -118,6 +115,7 @@ const Index = () => {
     setProduct(null);
     setError(null);
     setIsScanning(true);
+    barcodeRouter.reset(); // Reset the barcode router state
   };
 
   // Handle history item selection
@@ -127,17 +125,18 @@ const Index = () => {
     // No need to fetch from the database again as we already have the product data
   };
 
+  // Handle barcode detection
+  const handleBarcodeDetected = async (barcode: string) => {
+    await barcodeRouter.handleBarcodeScan(barcode);
+  };
+
   // Initialize scanning when the component mounts or when organization scanning changes
   useEffect(() => {
-    if (isOrganizationScanning) {
-      // In organization mode, make sure scanning is active
-      console.log("Organization scanning active, ensuring scanning is on");
-      setIsScanning(true);
-    } else if (!isScanning && !scannedBarcode) {
+    if (!isOrganizationScanning && !isScanning && !scannedBarcode) {
       // In normal mode, follow the regular rules
       startScanning();
     }
-  }, [isOrganizationScanning, scannedBarcode]);
+  }, [isOrganizationScanning, isScanning, scannedBarcode]);
 
   return (
     <div className="min-h-screen bg-background px-4 py-8 pb-16">
@@ -196,11 +195,6 @@ const Index = () => {
             )}
           </div>
         )}
-        
-        {/* Development info */}
-        <div className="mt-12 text-center text-xs text-muted-foreground">
-          
-        </div>
       </div>
       
       {/* Manager Tools */}
