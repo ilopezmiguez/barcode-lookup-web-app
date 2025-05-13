@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,15 +61,18 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   // Helper function to toggle Manager Tools
   const collapseManagerTools = useCallback(() => {
+    console.log("Collapsing manager tools");
     setIsManagerToolsCollapsed(true);
   }, []);
   
   const expandManagerTools = useCallback(() => {
+    console.log("Expanding manager tools");
     setIsManagerToolsCollapsed(false);
     
     // If we're in scanning_active state and the user expands the menu,
     // transition to reviewing_shelf state
     if (uiState === 'scanning_active') {
+      console.log("Transitioning from scanning_active to reviewing_shelf");
       setUiState('reviewing_shelf');
     }
   }, [uiState]);
@@ -119,12 +121,14 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Helper function to look up product names
   const lookupProductName = async (barcode: string): Promise<string | null> => {
     try {
+      console.log("Looking up product name for barcode:", barcode);
       const { data } = await supabase
         .from('products')
         .select('product_name')
         .eq('barcode_number', barcode)
         .single();
       
+      console.log("Product lookup result:", data);
       return data?.product_name || null;
     } catch (error) {
       console.log('Product lookup error:', error);
@@ -134,45 +138,51 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Handle a barcode scan
   const handleProductScan = useCallback(async (barcode: string) => {
-    if (!isOrganizing || (uiState !== 'scanning_active' && uiState !== 'reviewing_shelf')) {
+    console.log(`Organization Context: handleProductScan called with barcode ${barcode}`);
+    console.log(`Current state: isOrganizing=${isOrganizing}, uiState=${uiState}, currentShelfId=${currentShelfId}`);
+    
+    if (!isOrganizing) {
+      console.log("Not organizing, ignoring barcode");
+      return;
+    }
+    
+    if (uiState !== 'scanning_active' && uiState !== 'reviewing_shelf') {
+      console.log("Not in scanning_active or reviewing_shelf state, ignoring barcode");
       return;
     }
 
-    console.log(`Scanning product: ${barcode} for shelf: ${currentShelfId}`);
+    console.log(`Adding product: ${barcode} for shelf: ${currentShelfId}`);
     
-    setScannedProducts(prev => {
-      // Check if this barcode has already been scanned
-      const isDuplicate = prev.some(product => product.barcode === barcode);
-      
-      if (isDuplicate) {
-        toast({
-          title: "Producto ya escaneado",
-          description: `El código ${barcode} ya ha sido escaneado`,
-          variant: "default"
-        });
-        return prev;
-      }
-      
-      // Add the new product (we'll update with product name asynchronously)
-      const newProducts = [...prev, { 
+    // Check if this barcode has already been scanned
+    const isDuplicate = scannedProducts.some(product => product.barcode === barcode);
+    
+    if (isDuplicate) {
+      console.log("Duplicate barcode, not adding to list");
+      toast({
+        title: "Producto ya escaneado",
+        description: `El código ${barcode} ya ha sido escaneado`,
+        variant: "default"
+      });
+      return;
+    }
+    
+    // Add the new product (we'll update with product name asynchronously)
+    setScannedProducts(prev => [
+      ...prev, 
+      { 
         barcode, 
         timestamp: new Date(),
         productName: null // Will be updated when lookup completes
-      }];
+      }
+    ]);
       
-      // Provide feedback through toast
-      toast({
-        title: "Producto escaneado",
-        description: `Código: ${barcode}`,
-        duration: 1500
-      });
-      
-      return newProducts;
-    });
+    // Provide feedback through toast
+    console.log("Product added to scanned products list");
     
     // Try to find the product name in the database
     const productName = await lookupProductName(barcode);
     if (productName) {
+      console.log(`Found product name: ${productName} for barcode: ${barcode}`);
       // Update the product with its name if found
       setScannedProducts(current => 
         current.map(p => 
@@ -182,7 +192,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
         )
       );
     }
-  }, [isOrganizing, uiState, currentShelfId, toast]);
+  }, [isOrganizing, uiState, currentShelfId, scannedProducts, toast]);
 
   // Save the current shelf to Supabase
   const saveShelf = useCallback(async () => {

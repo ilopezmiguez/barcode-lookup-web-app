@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from '@/hooks/use-toast';
 
 export default function ScanningInterface() {
   const { 
@@ -26,6 +27,18 @@ export default function ScanningInterface() {
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
 
+  const onBarcodeDetected = async (barcode: string) => {
+    console.log("ScanningInterface detected barcode:", barcode);
+    await handleProductScan(barcode);
+    
+    // Provide immediate feedback with toast
+    toast({
+      title: "Producto escaneado",
+      description: `Código: ${barcode}`,
+      duration: 1500
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between bg-primary/10 p-3 rounded-md">
@@ -41,7 +54,7 @@ export default function ScanningInterface() {
       {!isReviewing && (
         <div className="mb-4">
           <BarcodeScanner 
-            onBarcodeDetected={handleProductScan} 
+            onBarcodeDetected={onBarcodeDetected} 
             isScanning={isScanning} 
           />
         </div>

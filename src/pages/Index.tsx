@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,12 +30,15 @@ const Index = () => {
   const { isOrganizing, uiState, handleProductScan } = useOrganization();
   
   // When the user is in organization mode and scanning is active, we need to handle it differently
-  const isOrganizationScanning = isOrganizing && uiState === 'scanning_active';
+  const isOrganizationScanning = isOrganizing && (uiState === 'scanning_active');
   
   // Combined barcode handling function that routes to either product lookup or organization
   const handleBarcodeDetected = async (barcode: string) => {
+    console.log("Main index detected barcode:", barcode, "isOrganizationScanning:", isOrganizationScanning);
+    
     // If we're in organization mode and scanning is active, send to organization
     if (isOrganizationScanning) {
+      console.log("Routing barcode to organization context");
       await handleProductScan(barcode);
       return;
     }
@@ -42,6 +46,7 @@ const Index = () => {
     // Otherwise, proceed with normal product lookup flow
     // Only process if it's a new barcode or first scan
     if (barcode !== scannedBarcode) {
+      console.log("Routing barcode to product lookup");
       setScannedBarcode(barcode);
       setIsScanning(false); // Pause scanning while looking up the product
       await lookupProduct(barcode);
@@ -117,12 +122,13 @@ const Index = () => {
   useEffect(() => {
     if (isOrganizationScanning) {
       // In organization mode, make sure scanning is active
+      console.log("Organization scanning active, ensuring scanning is on");
       setIsScanning(true);
     } else if (!isScanning && !scannedBarcode) {
       // In normal mode, follow the regular rules
       startScanning();
     }
-  }, [isOrganizationScanning]);
+  }, [isOrganizationScanning, scannedBarcode]);
 
   return (
     <div className="min-h-screen bg-background px-4 py-8 pb-16">
@@ -143,10 +149,13 @@ const Index = () => {
         
         {/* Scanner - Only display in organization mode or normal scanning mode */}
         <div className="mb-6">
-          <BarcodeScanner 
-            onBarcodeDetected={handleBarcodeDetected} 
-            isScanning={isScanning} 
-          />
+          {/* Only show scanner in the Index page when not in organization mode */}
+          {!isOrganizationScanning && (
+            <BarcodeScanner 
+              onBarcodeDetected={handleBarcodeDetected} 
+              isScanning={isScanning} 
+            />
+          )}
         </div>
         
         {/* Product Information - Hide during organization scanning */}
