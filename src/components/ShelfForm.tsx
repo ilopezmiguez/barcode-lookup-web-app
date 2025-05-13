@@ -12,7 +12,9 @@ export default function ShelfForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    startShelfScan(shelfId);
+    if (shelfId.trim()) {
+      startShelfScan(shelfId.trim());
+    }
   };
 
   return (

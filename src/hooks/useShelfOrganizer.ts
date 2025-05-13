@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,6 +52,7 @@ export function useShelfOrganizer() {
       return;
     }
     
+    console.log("Setting current shelf ID to:", shelfId); // Added logging
     setCurrentShelfId(shelfId);
     setScannedProducts([]);
     setUiState('scanning_shelf');
