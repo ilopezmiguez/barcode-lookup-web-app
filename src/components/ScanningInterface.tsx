@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import { useShelfOrganizer } from '@/hooks/useShelfOrganizer';
-import { Save, X, CircleCheck } from 'lucide-react';
+import { Save, X, CircleCheck, PackageSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
@@ -63,11 +63,23 @@ export default function ScanningInterface() {
               <div className="space-y-1">
                 {scannedProducts.map((product, idx) => (
                   <div key={idx} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                    <div className="flex items-center gap-2">
-                      <CircleCheck size={16} className="text-green-500" />
-                      <span className="font-mono">{product.barcode}</span>
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <CircleCheck size={16} className="text-green-500 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-mono text-xs truncate">{product.barcode}</div>
+                        <div className="truncate text-sm">
+                          {product.productName ? (
+                            product.productName
+                          ) : (
+                            <span className="flex items-center gap-1 text-muted-foreground italic">
+                              <PackageSearch size={12} />
+                              Buscando...
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground shrink-0 ml-2">
                       {formatDistanceToNow(product.timestamp, { addSuffix: true, locale: es })}
                     </span>
                   </div>

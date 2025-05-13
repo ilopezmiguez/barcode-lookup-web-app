@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface ScannedProduct {
   barcode: string;
   timestamp: Date;
+  productName?: string | null;
 }
 
 export type OrganizerUIState = 
@@ -63,7 +64,7 @@ export function useShelfOrganizer() {
   }, [toast]);
 
   // Handle a barcode scan
-  const handleProductScan = useCallback((barcode: string) => {
+  const handleProductScan = useCallback(async (barcode: string) => {
     if (!isOrganizing || uiState !== 'scanning_shelf') {
       return;
     }
@@ -83,8 +84,26 @@ export function useShelfOrganizer() {
         return prev;
       }
       
-      // Add the new product
-      const newProducts = [...prev, { barcode, timestamp: new Date() }];
+      // Try to find the product name in the database
+      lookupProductName(barcode).then(productName => {
+        if (productName) {
+          // Update the product with its name if found
+          setScannedProducts(current => 
+            current.map(p => 
+              p.barcode === barcode 
+                ? { ...p, productName } 
+                : p
+            )
+          );
+        }
+      });
+      
+      // Add the new product (we'll update with product name asynchronously)
+      const newProducts = [...prev, { 
+        barcode, 
+        timestamp: new Date(),
+        productName: null // Will be updated when lookup completes
+      }];
       
       // Provide feedback through toast
       toast({
@@ -96,6 +115,22 @@ export function useShelfOrganizer() {
       return newProducts;
     });
   }, [isOrganizing, uiState, currentShelfId, toast]);
+
+  // Helper function to look up product names
+  const lookupProductName = async (barcode: string): Promise<string | null> => {
+    try {
+      const { data } = await supabase
+        .from('products')
+        .select('product_name')
+        .eq('barcode_number', barcode)
+        .single();
+      
+      return data?.product_name || null;
+    } catch (error) {
+      console.log('Product lookup error:', error);
+      return null;
+    }
+  };
 
   // Save the current shelf to Supabase
   const saveShelf = useCallback(async () => {
