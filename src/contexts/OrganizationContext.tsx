@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,15 +168,15 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
     
     // Add the new product (we'll update with product name asynchronously)
-    setScannedProducts(prev => [
-      ...prev, 
-      { 
-        barcode, 
-        timestamp: new Date(),
-        productName: null // Will be updated when lookup completes
-      }
-    ]);
-      
+    const newProduct = {
+      barcode,
+      timestamp: new Date(),
+      productName: null // Will be updated when lookup completes
+    };
+    
+    console.log("Adding new product to scannedProducts:", newProduct);
+    setScannedProducts(prev => [...prev, newProduct]);
+    
     // Provide feedback through toast
     console.log("Product added to scanned products list");
     

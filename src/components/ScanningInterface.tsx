@@ -29,14 +29,30 @@ export default function ScanningInterface() {
 
   const onBarcodeDetected = async (barcode: string) => {
     console.log("ScanningInterface detected barcode:", barcode);
-    await handleProductScan(barcode);
+    // Make sure we don't process empty barcodes
+    if (!barcode || barcode.trim() === '') {
+      console.log("Empty barcode detected, ignoring");
+      return;
+    }
     
-    // Provide immediate feedback with toast
-    toast({
-      title: "Producto escaneado",
-      description: `Código: ${barcode}`,
-      duration: 1500
-    });
+    try {
+      await handleProductScan(barcode);
+      
+      // Provide immediate feedback with toast
+      toast({
+        title: "Producto escaneado",
+        description: `Código: ${barcode}`,
+        duration: 1500
+      });
+    } catch (error) {
+      console.error("Error handling product scan:", error);
+      toast({
+        title: "Error al escanear",
+        description: "No se pudo procesar el código de barras",
+        variant: "destructive",
+        duration: 3000
+      });
+    }
   };
 
   return (

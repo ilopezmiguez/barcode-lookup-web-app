@@ -36,11 +36,20 @@ const Index = () => {
   const handleBarcodeDetected = async (barcode: string) => {
     console.log("Main index detected barcode:", barcode, "isOrganizationScanning:", isOrganizationScanning);
     
+    if (!barcode || barcode.trim() === '') {
+      console.log("Empty barcode detected, ignoring");
+      return;
+    }
+    
     // If we're in organization mode and scanning is active, send to organization
     if (isOrganizationScanning) {
       console.log("Routing barcode to organization context");
-      await handleProductScan(barcode);
-      return;
+      try {
+        await handleProductScan(barcode);
+        return;
+      } catch (error) {
+        console.error("Error handling product scan in organization mode:", error);
+      }
     }
     
     // Otherwise, proceed with normal product lookup flow
@@ -149,7 +158,7 @@ const Index = () => {
         
         {/* Scanner - Only display in organization mode or normal scanning mode */}
         <div className="mb-6">
-          {/* Only show scanner in the Index page when not in organization mode */}
+          {/* Only show scanner in the Index page when not in organization scanning mode */}
           {!isOrganizationScanning && (
             <BarcodeScanner 
               onBarcodeDetected={handleBarcodeDetected} 
