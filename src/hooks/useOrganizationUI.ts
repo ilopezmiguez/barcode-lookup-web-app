@@ -43,9 +43,9 @@ export function useOrganizationUI(
   // Switch between scanning and reviewing modes
   const toggleScanningMode = useCallback((isReviewing: boolean) => {
     if (isReviewing) {
-      changeUiState('scanning_active');
-    } else {
       changeUiState('reviewing_shelf');
+    } else {
+      changeUiState('scanning_active');
     }
   }, [changeUiState]);
 

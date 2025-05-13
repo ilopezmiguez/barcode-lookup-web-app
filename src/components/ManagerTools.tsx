@@ -57,7 +57,7 @@ export function ManagerTools() {
           </div>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="p-4">
+        <CollapsibleContent className="p-4 max-h-[80vh] overflow-y-auto">
           <Tabs defaultValue="missing-products" className="w-full">
             <TabsList className="w-full mb-4">
               <TabsTrigger value="missing-products" className="flex-1">
@@ -68,7 +68,7 @@ export function ManagerTools() {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="missing-products" className="max-h-80 overflow-y-auto">
+            <TabsContent value="missing-products">
               <h3 className="text-lg font-semibold mb-4">Lista de Productos Faltantes</h3>
               
               {/* Actions */}
@@ -89,7 +89,7 @@ export function ManagerTools() {
               />
             </TabsContent>
             
-            <TabsContent value="shelf-organization" className="max-h-[calc(80vh-7rem)]">
+            <TabsContent value="shelf-organization" className="max-h-[60vh] overflow-y-auto">
               <ShelfOrganizer />
             </TabsContent>
           </Tabs>

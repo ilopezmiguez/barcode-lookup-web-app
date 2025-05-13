@@ -19,7 +19,6 @@ export default function ScanningInterface() {
     cancelCurrentShelf,
     isLoading,
     uiState,
-    expandManagerTools,
     toggleScanningMode
   } = useOrganization();
   
@@ -28,13 +27,13 @@ export default function ScanningInterface() {
   // Determine if we're in active scanning or reviewing mode
   const isReviewing = uiState === 'reviewing_shelf';
   const scanningTitle = isReviewing ? "Revisando productos para" : "Escaneando productos para";
-  
+
   // Toggle between scanning and reviewing modes
   const toggleView = () => {
     if (isReviewing) {
       toggleScanningMode(false); // Switch to scanning mode
     } else {
-      expandManagerTools(); // This will trigger transition to reviewing mode
+      toggleScanningMode(true); // Switch to reviewing mode
     }
   };
 
@@ -61,7 +60,7 @@ export default function ScanningInterface() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-20">
       <div className="flex items-center justify-between bg-primary/10 p-3 rounded-md">
         <span className="font-medium">
           {scanningTitle} <span className="font-bold text-primary">{currentShelfId}</span>
