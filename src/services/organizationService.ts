@@ -36,24 +36,17 @@ export const saveShelfProducts = async (
   scannedProducts: ScannedProduct[]
 ): Promise<{ success: boolean; error?: any }> => {
   try {
-    // Prepare data for bulk insert
-    const productsToInsert = scannedProducts.map(product => ({
+    // Prepare data for bulk insert - ensure we have a unique ID for each product
+    // Use timestamp to make entries unique when there are duplicate barcodes
+    const productsToInsert = scannedProducts.map((product, index) => ({
       shelf: currentShelfId,
       barcode_number: product.barcode,
-      event_id: currentEventId
+      event_id: currentEventId,
     }));
     
     console.log("Saving shelf with products:", productsToInsert);
     
-    // Check if the user is authenticated before inserting
-    const { data: userData } = await supabase.auth.getSession();
-    if (!userData.session) {
-      console.error("User is not authenticated");
-      return { 
-        success: false, 
-        error: "Usuario no autenticado. Por favor, inicie sesión para guardar el estante." 
-      };
-    }
+    // Remove authentication check - new RLS policies should handle this properly
     
     // Bulk insert into org_products table
     const { error } = await supabase

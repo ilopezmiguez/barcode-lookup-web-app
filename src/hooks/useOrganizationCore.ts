@@ -59,18 +59,29 @@ export function useOrganizationCore() {
   }, []);
 
   // Update a product in the scanned products list
+  // Modified to work with duplicate barcodes by using timestamps to match
   const updateScannedProduct = useCallback((barcode: string, updates: Partial<ScannedProduct>) => {
     console.log(`Updating scanned product with barcode ${barcode}:`, updates);
-    setScannedProducts(current => 
-      current.map(p => 
-        p.barcode === barcode 
+    setScannedProducts(current => {
+      // Find the most recent product with this barcode to update
+      const productsWithBarcode = current.filter(p => p.barcode === barcode);
+      if (productsWithBarcode.length === 0) return current;
+      
+      // Sort by timestamp (newest first) to get the most recent product
+      productsWithBarcode.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      const mostRecentTimestamp = productsWithBarcode[0].timestamp;
+      
+      // Update the most recent product with this barcode
+      return current.map(p => 
+        p.barcode === barcode && p.timestamp.getTime() === mostRecentTimestamp.getTime()
           ? { ...p, ...updates } 
           : p
-      )
-    );
+      );
+    });
   }, []);
 
   // Check if a product has already been scanned
+  // Still useful for notification purposes
   const isProductAlreadyScanned = useCallback((barcode: string) => {
     return scannedProducts.some(product => product.barcode === barcode);
   }, [scannedProducts]);

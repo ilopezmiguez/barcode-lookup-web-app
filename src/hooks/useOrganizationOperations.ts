@@ -27,21 +27,23 @@ export function useOrganizationOperations(
       return;
     }
     
-    // Check if this barcode has already been scanned
+    // Create new timestamp for each scan, allowing multiple scans of the same barcode
+    const timestamp = new Date();
+    
+    // Check if this barcode has already been scanned - now just for notification purposes
     if (isProductAlreadyScanned(barcode)) {
-      console.log("Duplicate barcode, not adding to list");
+      console.log("Duplicate barcode detected, adding as a new item");
       toast({
-        title: "Producto ya escaneado",
-        description: `El código ${barcode} ya ha sido escaneado`,
+        title: "Producto escaneado nuevamente",
+        description: `El código ${barcode} ha sido escaneado otra vez`,
         variant: "default"
       });
-      return;
     }
     
     // Add the new product (we'll update with product name asynchronously)
     const newProduct = {
       barcode,
-      timestamp: new Date(),
+      timestamp, // Each scan gets its own unique timestamp
       productName: null // Will be updated when lookup completes
     };
     
@@ -54,6 +56,7 @@ export function useOrganizationOperations(
       if (productName) {
         console.log(`Found product name: ${productName} for barcode: ${barcode}`);
         // Update the product with its name if found
+        // We need to update based on timestamp to handle multiple products with same barcode
         updateScannedProduct(barcode, { productName });
       }
     } catch (error) {
