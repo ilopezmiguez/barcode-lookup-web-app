@@ -45,12 +45,23 @@ export const saveShelfProducts = async (
     
     console.log("Saving shelf with products:", productsToInsert);
     
+    // Check if the user is authenticated before inserting
+    const { data: userData } = await supabase.auth.getSession();
+    if (!userData.session) {
+      console.error("User is not authenticated");
+      return { 
+        success: false, 
+        error: "Usuario no autenticado. Por favor, inicie sesión para guardar el estante." 
+      };
+    }
+    
     // Bulk insert into org_products table
     const { error } = await supabase
       .from('org_products')
       .insert(productsToInsert);
     
     if (error) {
+      console.error('Error saving shelf products:', error);
       return { success: false, error };
     }
     

@@ -78,7 +78,18 @@ export function useOrganizationOperations(
       const result = await saveShelfProducts(currentEventId, currentShelfId, scannedProducts);
       
       if (!result.success) {
-        throw result.error;
+        const errorMessage = result.error?.message || 
+                            result.error?.details || 
+                            result.error || 
+                            'Error desconocido';
+        
+        toast({
+          title: "Error al guardar el estante",
+          description: errorMessage,
+          variant: "destructive"
+        });
+        console.error('Detailed save error:', result.error);
+        return;
       }
       
       toast({
@@ -90,9 +101,11 @@ export function useOrganizationOperations(
       changeUiState('shelf_saved_options');
     } catch (error) {
       console.error('Error saving shelf:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      
       toast({
         title: "Error al guardar el estante",
-        description: error instanceof Error ? error.message : 'Error desconocido',
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
