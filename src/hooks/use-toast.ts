@@ -1,6 +1,9 @@
 
-// Re-export from ui/use-toast directly
-export { useToast, toast } from "@/components/ui/use-toast";
+// First import the toast function from the UI component
+import { useToast, toast } from "@/components/ui/use-toast";
+
+// Re-export the imports 
+export { useToast, toast };
 
 // Add convenience method for scanning notifications
 export const scanToast = {
