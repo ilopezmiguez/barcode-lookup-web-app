@@ -6,7 +6,7 @@ import { useProductScanning } from '@/hooks/useProductScanning';
 import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-// Import new component files
+// Import component files
 import FloatingExpandButton from '@/components/scanner/FloatingExpandButton';
 import CompactProductsList from '@/components/scanner/CompactProductsList';
 import ShelfHeader from '@/components/scanner/ShelfHeader';

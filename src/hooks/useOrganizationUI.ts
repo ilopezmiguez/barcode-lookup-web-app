@@ -46,6 +46,12 @@ export function useOrganizationUI(
     
     if (isReviewing) {
       changeUiState('reviewing_shelf');
+      
+      // When switching to review mode, show a toast notification
+      toast({
+        title: "Modo de revisión activado",
+        description: "Revisando productos escaneados"
+      });
     } else {
       changeUiState('scanning_active');
       

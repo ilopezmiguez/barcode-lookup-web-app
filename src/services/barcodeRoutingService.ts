@@ -25,7 +25,7 @@ export interface BarcodeRouterConfig {
 export class BarcodeRoutingService {
   private config: BarcodeRouterConfig;
   private lastScannedBarcode: string | null = null;
-  private scanCooldownMs: number = 3000; // 3 second cooldown
+  private scanCooldownMs: number = 1000; // 1 second cooldown (changed from 3000ms)
   private scanTimeoutId: number | null = null;
 
   constructor(initialConfig: BarcodeRouterConfig) {

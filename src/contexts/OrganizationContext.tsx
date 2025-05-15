@@ -5,6 +5,7 @@ import { useManagerUIState } from '@/hooks/useManagerUIState';
 import { ScannedProduct, OrganizerUIState } from '@/types/organization';
 import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
 import { useBarcodeRouter } from '@/hooks/useBarcodeRouter';
+import { toast } from '@/hooks/use-toast';
 
 // Define the shape of our context
 interface OrganizationContextType {
@@ -51,10 +52,15 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     // Toggle the scanning/reviewing state
     organizationState.toggleScanningMode(isReviewing);
     
-    // When returning to scanning mode, collapse the manager tools
+    // When returning to scanning mode, collapse the manager tools and show a toast
     if (!isReviewing) {
       console.log("Collapsing manager tools when returning to scanning mode");
       managerUIState.collapseManagerTools();
+      
+      toast({
+        title: "Modo de escaneo activado",
+        description: "Escanee productos para añadirlos al estante"
+      });
     }
   }, [organizationState.toggleScanningMode, managerUIState.collapseManagerTools]);
   
