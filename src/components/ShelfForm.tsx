@@ -7,13 +7,19 @@ import { ScanBarcode } from 'lucide-react';
 import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function ShelfForm() {
-  const { startShelfScan } = useOrganization();
+  const { startShelfScan, collapseManagerTools } = useOrganization();
   const [shelfId, setShelfId] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (shelfId.trim()) {
       startShelfScan(shelfId.trim());
+      
+      // Explicitly collapse manager tools after submission with a slight delay
+      // to ensure smooth transition
+      setTimeout(() => {
+        collapseManagerTools();
+      }, 300);
     }
   };
 

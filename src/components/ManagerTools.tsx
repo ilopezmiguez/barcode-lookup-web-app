@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShelfOrganizer } from '@/components/ShelfOrganizer';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { Button } from '@/components/ui/button';
-import { useManagerUIState } from '@/hooks/useManagerUIState';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function ManagerTools() {
   // Use the manager UI state hook
@@ -17,14 +17,13 @@ export function ManagerTools() {
     isManagerToolsOpen: isOpen, 
     setIsManagerToolsOpen: setIsOpen,
     expandManagerTools,
-    collapseManagerTools
+    collapseManagerTools,
+    uiState,
+    isOrganizing,
+    scannedProducts
   } = useOrganization();
   
-  // Get the organization context
-  const { 
-    uiState, 
-    isOrganizing
-  } = useOrganization();
+  const isMobile = useIsMobile();
   
   // Pass only the isOpen state to the hook - toast will be obtained inside the hook
   const { 
@@ -38,16 +37,6 @@ export function ManagerTools() {
     clearMissingProducts 
   } = useMissingProducts(isOpen);
   
-  // Auto-expand the manager tools when we need to show the shelf ID input
-  useEffect(() => {
-    if (uiState === 'awaiting_shelf_id' || uiState === 'shelf_saved_options' || uiState === 'reviewing_shelf') {
-      setIsOpen(true);
-    } else if (uiState === 'scanning_active') {
-      // Auto-collapse for scanning_active state (mobile optimization)
-      setIsOpen(false);
-    }
-  }, [uiState, setIsOpen]);
-
   // Current active tab
   const [activeTab, setActiveTab] = useState('missing-products');
 
@@ -59,10 +48,15 @@ export function ManagerTools() {
   }, [isOrganizing]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-md">
+    <div className={`fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-md transition-all duration-300 ${isOpen ? '' : 'pb-0'}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <CollapsibleTrigger className="flex items-center justify-center w-full py-2 hover:bg-muted transition-colors">
           <div className="flex items-center gap-2">
+            {isOrganizing && !isOpen && scannedProducts.length > 0 && (
+              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs font-medium">
+                {scannedProducts.length}
+              </span>
+            )}
             <span className="font-semibold">Herramientas de Administrador</span>
             {isOpen ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
           </div>
@@ -70,7 +64,7 @@ export function ManagerTools() {
         
         <CollapsibleContent className="p-4 max-h-[60vh] overflow-y-auto">
           {/* Floating close button - visible on mobile when scanning */}
-          {uiState === 'scanning_active' && (
+          {uiState === 'scanning_active' && isMobile && (
             <div className="md:hidden fixed top-4 right-4 z-50">
               <Button 
                 size="sm" 
