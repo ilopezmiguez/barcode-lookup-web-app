@@ -47,8 +47,11 @@ export function ManagerTools() {
     }
   }, [isOrganizing]);
 
+  // Add additional height classes when collapsed to prevent overlap
+  const collapsedHeightClass = !isOpen && uiState === 'scanning_active' ? 'h-12' : '';
+
   return (
-    <div className={`fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-md transition-all duration-300 ${isOpen ? '' : 'pb-0'}`}>
+    <div className={`fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-md transition-all duration-300 ${collapsedHeightClass} ${isOpen ? '' : 'pb-0'}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <CollapsibleTrigger className="flex items-center justify-center w-full py-2 hover:bg-muted transition-colors">
           <div className="flex items-center gap-2">

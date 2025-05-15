@@ -53,6 +53,14 @@ export default function ScanningInterface() {
     }
   };
 
+  // Ensure scanner visibility when appropriate
+  useEffect(() => {
+    if (uiState === 'scanning_active' && !isReviewing) {
+      setIsScanning(true);
+      console.log('Scanner should be visible now, isManagerToolsOpen:', isManagerToolsOpen);
+    }
+  }, [uiState, isReviewing, isManagerToolsOpen]);
+
   // Floating manager tools expander button
   const FloatingExpandButton = () => (
     !isManagerToolsOpen && (
@@ -107,7 +115,7 @@ export default function ScanningInterface() {
         </span>
       </div>
       
-      {/* Scanner - Only show when actively scanning */}
+      {/* Scanner - Show when scanning is active and not in review mode */}
       {!isReviewing && (
         <div className="mb-4">
           <BarcodeScanner 

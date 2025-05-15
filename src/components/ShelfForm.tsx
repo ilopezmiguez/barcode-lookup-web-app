@@ -15,7 +15,7 @@ export default function ShelfForm() {
     if (shelfId.trim()) {
       startShelfScan(shelfId.trim());
       
-      // Explicitly collapse manager tools after submission with a slight delay
+      // Explicitly collapse manager tools after submission with a delay
       // to ensure smooth transition
       setTimeout(() => {
         collapseManagerTools();

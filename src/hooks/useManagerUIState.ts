@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { OrganizerUIState } from '@/types/organization';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from '@/hooks/use-toast';
+import { scanToast } from '@/hooks/use-toast';
 
 /**
  * Hook to manage the UI state of the manager tools
@@ -33,12 +34,7 @@ export function useManagerUIState(uiState: OrganizerUIState) {
       collapseManagerTools();
       
       // Show a toast notification when scanning begins
-      if (uiState === 'scanning_active') {
-        toast({
-          title: "Escáner activo",
-          description: "Escanee los productos del estante",
-        });
-      }
+      scanToast.scanningStarted();
     }
   }, [uiState, expandManagerTools, collapseManagerTools]);
 
