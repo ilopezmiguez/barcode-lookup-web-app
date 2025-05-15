@@ -57,13 +57,12 @@ export default function ScanningInterface() {
   useEffect(() => {
     if (uiState === 'scanning_active' && !isReviewing) {
       setIsScanning(true);
-      console.log('Scanner should be visible now, isManagerToolsOpen:', isManagerToolsOpen);
     }
-  }, [uiState, isReviewing, isManagerToolsOpen]);
+  }, [uiState, isReviewing]);
 
-  // Floating manager tools expander button
+  // Floating manager tools expander button - only show when collapsed
   const FloatingExpandButton = () => (
-    !isManagerToolsOpen && (
+    !isManagerToolsOpen && scannedProducts.length > 0 && (
       <div className="fixed bottom-20 right-4 z-40">
         <Button
           size="sm"
@@ -78,7 +77,7 @@ export default function ScanningInterface() {
     )
   );
   
-  // Only show compact list when manager tools are collapsed and we have products
+  // Compact product indicator - only show when manager tools are collapsed
   const CompactProductsList = () => (
     !isManagerToolsOpen && scannedProducts.length > 0 ? (
       <div className="fixed top-4 left-4 right-4 z-30 bg-background/80 backdrop-blur-sm rounded-lg shadow-md p-2 border border-border">
@@ -135,69 +134,6 @@ export default function ScanningInterface() {
             {isScanning ? 'Pausar Escáner' : 'Reanudar Escáner'}
           </Button>
         </div>
-      )}
-      
-      {/* Scanned Items List - Only show when manager tools are open or in review mode */}
-      {(isManagerToolsOpen || isReviewing) && (
-        <Card className="mb-4">
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium">Productos escaneados ({scannedProducts.length})</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleView}
-                className="h-8 px-2"
-              >
-                {isReviewing ? (
-                  <>
-                    <Minimize size={16} className="mr-1" />
-                    Volver al Escaneo
-                  </>
-                ) : (
-                  <>
-                    <Expand size={16} className="mr-1" />
-                    Expandir Lista
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            {scannedProducts.length === 0 ? (
-              <p className="text-muted-foreground text-center py-2">
-                No hay productos escaneados aún
-              </p>
-            ) : (
-              <ScrollArea className={isReviewing ? "h-96" : "h-52"}>
-                <div className="space-y-1">
-                  {scannedProducts.map((product, idx) => (
-                    <div key={`${product.barcode}-${product.timestamp.getTime()}`} className="flex items-center justify-between bg-muted/50 p-2 rounded">
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <CircleCheck size={16} className="text-green-500 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-mono text-xs truncate">{product.barcode}</div>
-                          <div className="truncate text-sm">
-                            {product.productName ? (
-                              product.productName
-                            ) : (
-                              <span className="flex items-center gap-1 text-muted-foreground italic">
-                                <PackageSearch size={12} />
-                                Buscando...
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="text-xs text-muted-foreground shrink-0 ml-2">
-                        {formatDistanceToNow(product.timestamp, { addSuffix: true, locale: es })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </CardContent>
-        </Card>
       )}
       
       {/* Action Buttons */}

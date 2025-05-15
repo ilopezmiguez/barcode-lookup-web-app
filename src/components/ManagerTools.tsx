@@ -10,6 +10,11 @@ import { ShelfOrganizer } from '@/components/ShelfOrganizer';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { CircleCheck, PackageSearch, Expand, Minimize } from 'lucide-react';
 
 export function ManagerTools() {
   // Use the manager UI state hook
@@ -20,7 +25,8 @@ export function ManagerTools() {
     collapseManagerTools,
     uiState,
     isOrganizing,
-    scannedProducts
+    scannedProducts,
+    toggleScanningMode
   } = useOrganization();
   
   const isMobile = useIsMobile();
@@ -47,8 +53,52 @@ export function ManagerTools() {
     }
   }, [isOrganizing]);
 
+  // Determine if we're in review mode
+  const isReviewing = uiState === 'reviewing_shelf';
+
   // Add additional height classes when collapsed to prevent overlap
   const collapsedHeightClass = !isOpen && uiState === 'scanning_active' ? 'h-12' : '';
+
+  // Scanned Products List Component - Only shown in the manager tools when in organization mode
+  const ScannedProductsList = () => {
+    if (scannedProducts.length === 0) {
+      return (
+        <p className="text-muted-foreground text-center py-2">
+          No hay productos escaneados aún
+        </p>
+      );
+    }
+    
+    return (
+      <ScrollArea className={isReviewing ? "h-96" : "h-52"}>
+        <div className="space-y-1">
+          {scannedProducts.map((product, idx) => (
+            <div key={`${product.barcode}-${product.timestamp.getTime()}`} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <CircleCheck size={16} className="text-green-500 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="font-mono text-xs truncate">{product.barcode}</div>
+                  <div className="truncate text-sm">
+                    {product.productName ? (
+                      product.productName
+                    ) : (
+                      <span className="flex items-center gap-1 text-muted-foreground italic">
+                        <PackageSearch size={12} />
+                        Buscando...
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                {formatDistanceToNow(product.timestamp, { addSuffix: true, locale: es })}
+              </span>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+    );
+  };
 
   return (
     <div className={`fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-md transition-all duration-300 ${collapsedHeightClass} ${isOpen ? '' : 'pb-0'}`}>
@@ -117,7 +167,39 @@ export function ManagerTools() {
             </TabsContent>
             
             <TabsContent value="shelf-organization" className="max-h-[55vh] overflow-y-auto">
+              {/* Show ShelfOrganizer for form inputs and options */}
               <ShelfOrganizer />
+              
+              {/* Only show product list when in scanning or review mode */}
+              {(uiState === 'scanning_active' || uiState === 'reviewing_shelf') && (
+                <Card className="mb-4 mt-4">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">Productos escaneados ({scannedProducts.length})</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleScanningMode(uiState !== 'reviewing_shelf')}
+                        className="h-8 px-2"
+                      >
+                        {isReviewing ? (
+                          <>
+                            <Minimize size={16} className="mr-1" />
+                            Volver al Escaneo
+                          </>
+                        ) : (
+                          <>
+                            <Expand size={16} className="mr-1" />
+                            Expandir Lista
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <ScannedProductsList />
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </CollapsibleContent>

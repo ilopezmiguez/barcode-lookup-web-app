@@ -55,9 +55,11 @@ export function ShelfOrganizer() {
         </div>
       )}
 
+      {/* Only show the form here, the scanner stays in the main UI */}
       {uiState === 'awaiting_shelf_id' && <ShelfForm />}
-      {(uiState === 'scanning_active' || uiState === 'reviewing_shelf') && <ScanningInterface />}
       {uiState === 'shelf_saved_options' && <SavedShelfOptions />}
+      
+      {/* We don't include ScanningInterface here anymore */}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import ManagerTools from '@/components/ManagerTools';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { useProductScanning } from '@/hooks/useProductScanning';
 import { BarcodeHandlingMode } from '@/services/barcodeRoutingService';
+import ScanningInterface from '@/components/ScanningInterface';
 
 interface Product {
   product_name: string;
@@ -31,7 +32,7 @@ const Index = () => {
   const { isOrganizing, uiState } = useOrganization();
   
   // When the user is in organization mode and scanning is active, we need to handle it differently
-  const isOrganizationScanning = isOrganizing && (uiState === 'scanning_active');
+  const isOrganizationScanning = isOrganizing && (uiState === 'scanning_active' || uiState === 'reviewing_shelf');
   
   // Define product lookup function
   const lookupProduct = async (barcode: string) => {
@@ -148,49 +149,49 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Scanner - Only display in organization mode or normal scanning mode */}
-        <div className="mb-6">
-          {/* Only show scanner in the Index page when not in organization scanning mode */}
-          {!isOrganizationScanning && (
-            <BarcodeScanner 
-              onBarcodeDetected={onBarcodeDetected} 
-              isScanning={isScanning} 
-            />
-          )}
-        </div>
-        
-        {/* Product Information - Hide during organization scanning */}
-        {!isOrganizationScanning && (
-          <div className="mb-6">
-            <ProductDisplay 
-              product={product} 
-              isLoading={isLoading} 
-              error={error} 
-              scannedBarcode={scannedBarcode}
-              onHistoryItemClick={handleHistoryItemClick} 
-            />
-          </div>
-        )}
-        
-        {/* Controls - Hide during organization scanning */}
-        {!isOrganizationScanning && (
-          <div className="mt-6 flex justify-center space-x-4">
-            {!isScanning && (
-              <Button onClick={startScanning} disabled={isLoading}>
-                Continuar Escaneando
-              </Button>
-            )}
+        {/* Main Content Area - Show Organization UI or Normal Scanner */}
+        {isOrganizationScanning ? (
+          <ScanningInterface />
+        ) : (
+          <>
+            {/* Scanner - Only display in normal mode */}
+            <div className="mb-6">
+              <BarcodeScanner 
+                onBarcodeDetected={onBarcodeDetected} 
+                isScanning={isScanning} 
+              />
+            </div>
             
-            {scannedBarcode && (
-              <Button onClick={resetScanner} variant="outline" disabled={isLoading}>
-                Escanear Nuevo Código
-              </Button>
-            )}
-          </div>
+            {/* Product Information */}
+            <div className="mb-6">
+              <ProductDisplay 
+                product={product} 
+                isLoading={isLoading} 
+                error={error} 
+                scannedBarcode={scannedBarcode}
+                onHistoryItemClick={handleHistoryItemClick} 
+              />
+            </div>
+            
+            {/* Controls */}
+            <div className="mt-6 flex justify-center space-x-4">
+              {!isScanning && (
+                <Button onClick={startScanning} disabled={isLoading}>
+                  Continuar Escaneando
+                </Button>
+              )}
+              
+              {scannedBarcode && (
+                <Button onClick={resetScanner} variant="outline" disabled={isLoading}>
+                  Escanear Nuevo Código
+                </Button>
+              )}
+            </div>
+          </>
         )}
       </div>
       
-      {/* Manager Tools */}
+      {/* Manager Tools - Always visible */}
       <ManagerTools />
     </div>
   );
