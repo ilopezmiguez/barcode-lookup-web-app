@@ -28,7 +28,7 @@ interface OrganizationContextType {
   
   // Manager tools UI state
   isManagerToolsOpen: boolean;
-  setIsManagerToolsOpen: (isOpen: boolean) => void;  // Added the missing property
+  setIsManagerToolsOpen: (isOpen: boolean) => void;
   collapseManagerTools: () => void;
   expandManagerTools: () => void;
 }
@@ -43,6 +43,20 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   
   // Use the manager UI state hook
   const managerUIState = useManagerUIState(organizationState.uiState);
+  
+  // Enhanced toggleScanningMode that coordinates with manager tools
+  const enhancedToggleScanningMode = React.useCallback((isReviewing: boolean) => {
+    console.log(`enhancedToggleScanningMode called with isReviewing=${isReviewing}`);
+    
+    // Toggle the scanning/reviewing state
+    organizationState.toggleScanningMode(isReviewing);
+    
+    // When returning to scanning mode, collapse the manager tools
+    if (!isReviewing) {
+      console.log("Collapsing manager tools when returning to scanning mode");
+      managerUIState.collapseManagerTools();
+    }
+  }, [organizationState.toggleScanningMode, managerUIState.collapseManagerTools]);
   
   // Handle transition from scanning_active to reviewing_shelf when manager tools are expanded
   const expandManagerTools = React.useCallback(() => {
@@ -69,8 +83,9 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Prepare the context value by combining our hooks
   const contextValue: OrganizationContextType = {
     ...organizationState,
+    toggleScanningMode: enhancedToggleScanningMode, // Use the enhanced version
     isManagerToolsOpen: managerUIState.isManagerToolsOpen,
-    setIsManagerToolsOpen: managerUIState.setIsManagerToolsOpen, // Added the missing property
+    setIsManagerToolsOpen: managerUIState.setIsManagerToolsOpen,
     collapseManagerTools: managerUIState.collapseManagerTools,
     expandManagerTools,
   };

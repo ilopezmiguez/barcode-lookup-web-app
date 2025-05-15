@@ -59,6 +59,13 @@ export function ManagerTools() {
   // Add additional height classes when collapsed to prevent overlap
   const collapsedHeightClass = !isOpen && uiState === 'scanning_active' ? 'h-12' : '';
 
+  // Return to scanning mode and collapse manager tools
+  const handleReturnToScanning = () => {
+    console.log("Returning to scanning mode from manager tools");
+    toggleScanningMode(false); // Set to scanning mode
+    collapseManagerTools(); // Close the manager tools panel
+  };
+
   // Scanned Products List Component - Only shown in the manager tools when in organization mode
   const ScannedProductsList = () => {
     if (scannedProducts.length === 0) {

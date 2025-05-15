@@ -49,14 +49,21 @@ export default function ScanningInterface() {
   };
 
   // Toggle scanning state
-  const toggleScanning = () => setIsScanning(!isScanning);
+  const toggleScanning = () => {
+    console.log(`Toggling scanning state from ${isScanning} to ${!isScanning}`);
+    setIsScanning(!isScanning);
+  };
 
   // Ensure scanner visibility when appropriate
   useEffect(() => {
-    if (uiState === 'scanning_active' && !isReviewing) {
+    console.log("ScanningInterface: UI state changed to", uiState);
+    
+    // When returning to scanning_active, always ensure scanning is enabled
+    if (uiState === 'scanning_active') {
+      console.log("Activating scanner for scanning_active state");
       setIsScanning(true);
     }
-  }, [uiState, isReviewing]);
+  }, [uiState]);
 
   return (
     <div className="space-y-4 pb-20">

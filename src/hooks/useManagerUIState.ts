@@ -36,6 +36,8 @@ export function useManagerUIState(uiState: OrganizerUIState) {
       // Show a toast notification when scanning begins
       scanToast.scanningStarted();
     }
+    
+    console.log(`Manager UI state updated for uiState: ${uiState}, isOpen: ${isManagerToolsOpen}`);
   }, [uiState, expandManagerTools, collapseManagerTools]);
 
   return {

@@ -33,6 +33,16 @@ export function useOrganizationState() {
   // Set up manager UI state
   const managerUI = useManagerUIState(core.uiState);
 
+  // Log state changes for debugging
+  console.log("Organization state:", {
+    isOrganizing: core.isOrganizing,
+    currentEventId: core.currentEventId,
+    currentShelfId: core.currentShelfId,
+    uiState: core.uiState,
+    isManagerToolsOpen: managerUI.isManagerToolsOpen,
+    productCount: core.scannedProducts.length
+  });
+
   return {
     // State
     isOrganizing: core.isOrganizing,

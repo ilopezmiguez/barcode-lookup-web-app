@@ -42,10 +42,18 @@ export function useOrganizationUI(
 
   // Switch between scanning and reviewing modes
   const toggleScanningMode = useCallback((isReviewing: boolean) => {
+    console.log(`toggleScanningMode called with isReviewing=${isReviewing}`);
+    
     if (isReviewing) {
       changeUiState('reviewing_shelf');
     } else {
       changeUiState('scanning_active');
+      
+      // When switching back to scanning mode, show a toast notification
+      toast({
+        title: "Modo de escaneo activado",
+        description: "Escanee productos para añadirlos al estante"
+      });
     }
   }, [changeUiState]);
 
